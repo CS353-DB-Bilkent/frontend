@@ -12,7 +12,7 @@ export async function getMyEvents() {
   return await axiosInstance.get('/event/me');
 }
 
-export async function searchEvents(searchTerm, artistName, brandName, venueName, location, type, minAgeAllowed, startDate) {
+export async function searchEvents(searchTerm, artistName, brandName, venueName, location, type, minAgeAllowed, startDate, orderBy, orderDirection) {
   return await axiosInstance.post('/event/filter', {
     searchTerm,
     artistName,
@@ -22,5 +22,7 @@ export async function searchEvents(searchTerm, artistName, brandName, venueName,
     type,
     minAgeAllowed,
     startDate,
+    orderBy,
+    orderDirection,
   });
 }

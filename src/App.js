@@ -27,7 +27,7 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: ['poppins', 'dm-sans'].join(','),
+    fontFamily: ['roboto'].join(','),
   },
 });
 
