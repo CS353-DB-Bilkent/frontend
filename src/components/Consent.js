@@ -3,7 +3,7 @@ import { Paper, Box, Typography, Fade, Stack, Button } from '@mui/material';
 import TrapFocus from '@mui/material/Unstable_TrapFocus';
 
 export default function Consent() {
-  const [bannerOpen, setBannerOpen] = useState(true);
+  const [bannerOpen, setBannerOpen] = useState(false);
 
   const closeBanner = () => {
     setBannerOpen(false);

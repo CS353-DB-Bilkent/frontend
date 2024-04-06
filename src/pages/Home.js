@@ -10,6 +10,6 @@ export default function DashboardNavigator() {
   React.useEffect(() => {
     if (user.role === ROLES.SUPER_ADMIN) return navigate('/super-admin/create-admin');
 
-    return navigate(`/${user.role.toLowerCase().replace(/_/g, '-')}/dashboard`);
+    return navigate('/main');
   });
 }

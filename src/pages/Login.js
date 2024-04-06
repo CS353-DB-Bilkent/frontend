@@ -53,7 +53,7 @@ export default function Login() {
     >
       <CssBaseline />
       <Typography fontSize={'24px'} mt="16px">
-        Bilkent University CS Internship Management System
+        Ticket Seller Application
       </Typography>
       <Grid
         container
@@ -61,6 +61,9 @@ export default function Login() {
         component={Paper}
         sx={{ minWidth: '400px', width: '530px', borderRadius: '16px', mt: 10, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
       >
+        <Typography fontSize={'24px'} mt="16px" mb={'16px'}>
+          Welcome!
+        </Typography>
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mb: 5, width: '60%' }}>
           <TextField required name="email" id="email" label="Email" variant="outlined" fullWidth sx={{ mb: 3 }} color="primary" />
           <TextField required name="password" id="password" label="Password" variant="outlined" fullWidth type="password" sx={{ mb: 3, color: 'primary.light' }} />

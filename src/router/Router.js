@@ -15,6 +15,8 @@ import DashboardNavigator from '../pages/Home';
 import ContactPage from '../pages/ContactPage';
 import ErrorPage from '../components/ErrorPage';
 import Dashboard from '../pages/Dashboard';
+import MainEventsPage from '../pages/MainEventsPage';
+import { Navigate } from 'react-router-dom';
 
 export function Router() {
   return <RouterProvider router={router} />;
@@ -24,6 +26,10 @@ const router = createBrowserRouter([
   {
     path: '*',
     element: <NotFound />,
+  },
+  {
+    path: '', // Navigate to /main
+    element: <Navigate to="/main" replace />,
   },
   {
     path: 'login',
@@ -38,6 +44,18 @@ const router = createBrowserRouter([
   {
     path: 'reset-password/:code',
     element: <ResetPassword />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: 'main',
+    element: (
+      <div>
+        <UserLoader>
+          <Header />
+          <MainEventsPage />
+        </UserLoader>
+      </div>
+    ),
     errorElement: <ErrorPage />,
   },
   {
