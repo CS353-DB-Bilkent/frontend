@@ -17,6 +17,7 @@ import ErrorPage from '../components/ErrorPage';
 import Dashboard from '../pages/Dashboard';
 import MainEventsPage from '../pages/MainEventsPage';
 import { Navigate } from 'react-router-dom';
+import Wallet from '../pages/Wallet';
 
 export function Router() {
   return <RouterProvider router={router} />;
@@ -50,10 +51,8 @@ const router = createBrowserRouter([
     path: 'main',
     element: (
       <div>
-        <UserLoader>
-          <Header />
-          <MainEventsPage />
-        </UserLoader>
+        <Header />
+        <MainEventsPage />
       </div>
     ),
     errorElement: <ErrorPage />,
@@ -76,6 +75,10 @@ const router = createBrowserRouter([
       {
         path: 'contact',
         element: <ContactPage />,
+      },
+      {
+        path: 'wallet',
+        element: <Wallet />,
       },
       {
         path: 'change-password',

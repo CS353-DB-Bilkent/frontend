@@ -2,7 +2,7 @@ import ERROR_CODES from '../constants/errorCodes';
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: `http://localhost:8080` || process.env.BACKEND_API_URL || `http://ticket-seller.eu-central-1.elasticbeanstalk.com/`,
+  baseURL: `http://localhost:8080` || `http://ticket-seller.eu-central-1.elasticbeanstalk.com/` || process.env.BACKEND_API_URL,
 });
 
 const successHandler = (response) => {
