@@ -53,7 +53,7 @@ export default function Login() {
     >
       <CssBaseline />
       <Typography fontSize={'24px'} mt="16px">
-        Ticket Seller Application
+        TicketBase
       </Typography>
       <Grid
         container
@@ -61,19 +61,29 @@ export default function Login() {
         component={Paper}
         sx={{ minWidth: '400px', width: '530px', borderRadius: '16px', mt: 10, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}
       >
-        <Typography fontSize={'24px'} mt="16px" mb={'16px'}>
-          Welcome!
-        </Typography>
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mb: 5, width: '60%' }}>
+          <img src={`${process.env.PUBLIC_URL}/TBIcon.webp`} alt="Login" style={{ display:'block',borderRadius: '10px',width:'80px', height:'auto', margin:'32px 0 16px 120px'  }} />
           <TextField required name="email" id="email" label="Email" variant="outlined" fullWidth sx={{ mb: 3 }} color="primary" />
           <TextField required name="password" id="password" label="Password" variant="outlined" fullWidth type="password" sx={{ mb: 3, color: 'primary.light' }} />
-          <Button type="submit" variant="contained" fullWidth sx={{ bgcolor: 'primary.main' }}>
+          <Button type="submit" variant="contained" fullWidth   sx={{
+            bgcolor: 'purple !important',
+            '&:hover': {
+              bgcolor: 'darkpurple !important',
+            },
+          }}>
             Sign In
           </Button>
 
           <Link sx={{ mt: 1, textDecoration: 'none' }} href="/forgot" variant="body2">
             Forgot password?
           </Link>
+
+          <Divider style={{ marginTop:20, width: '100%', background: 'primary.dark' }} />
+
+          <Button type="button" variant="contained" sx={{ display: 'block', mt:3, ml:10, width: '50%', bgcolor: 'primary',}} onClick={() => navigate('/register')}>
+            Sign Up
+          </Button>
+
         </Box>
         <Divider style={{ width: '60%', background: 'primary.dark' }} />
         <Typography sx={{ color: 'secondary.main' }} mr="10px" fontSize={'12px'}>

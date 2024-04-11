@@ -6,6 +6,7 @@ import { Outlet } from 'react-router-dom';
 import Logout from '../components/Logout';
 import { PermissionContainer } from '../components/permission/PermissionContainer';
 import Login from '../pages/Login';
+import RegisterUser from '../pages/RegisterUser';
 import ForgotPassword from '../pages/ForgotPassword';
 import ResetPassword from '../pages/ResetPassword';
 import ROLES from '../constants/roles';
@@ -44,6 +45,11 @@ const router = createBrowserRouter([
   {
     path: 'reset-password/:code',
     element: <ResetPassword />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: 'register',
+    element: <RegisterUser />,
     errorElement: <ErrorPage />,
   },
   {

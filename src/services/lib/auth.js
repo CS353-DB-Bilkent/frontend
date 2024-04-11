@@ -7,11 +7,27 @@ export function loginUser(email, password) {
   });
 }
 
-export function signUpUser(email, name, bilkentId, password) {
-  return axiosInstance.post('/auth/signup', {
+export function signUpUser(email, name, password,phone,birthDate) {
+  return axiosInstance.post('/auth/register/user', {
     email: email,
     name: name,
-    bilkentId: bilkentId,
+    phone: phone,
     password: password,
+    birthDate: birthDate,
+    companyName: "",
+    salary: 0,
+    iban: "",
+  });
+}
+export function signUpEventOrganizer(email, name, password,phone,birthDate,companyName,salary,iban) {
+  return axiosInstance.post('/auth/register/event-organizer', {
+    email: email,
+    name: name,
+    phone: phone,
+    password: password,
+    birthDate: birthDate,
+    companyName: companyName,
+    salary: salary,
+    iban: iban,
   });
 }
