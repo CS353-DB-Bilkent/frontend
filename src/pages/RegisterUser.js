@@ -1,46 +1,53 @@
 import * as React from 'react';
-import { Box, Button, Grid, Link, TextField, Typography, Switch, InputAdornment } from '@mui/material';
+import { Box, Button, Grid, Link, TextField, Typography, Switch } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { signUpEventOrganizer, signUpUser } from '../services/lib/auth';
 import { useState } from 'react';
+import { useLoadingStore } from '../stores/Loading';
+import { notify, notifyError } from '../utility/notify';
+import NOTIFY_TYPES from '../constants/notifyTypes';
 
 export default function RegisterUser() {
   const navigate = useNavigate();
   const [isOrganizer, setIsOrganizer] = useState(false);
+  const setLoading = useLoadingStore((s) => s.setLoading);
+
   const handleFormSwitch = (event) => {
     setIsOrganizer(event.target.checked);
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
+
     const data = {
       name: formData.get('name'),
       email: formData.get('email'),
       password: formData.get('password'),
       phone: formData.get('phone'),
-      birthDate: formData.get('birthDate'),
+      birthDate: new Date(formData.get('birthDate')),
       companyName: isOrganizer ? formData.get('companyName') : '',
       salary: isOrganizer ? formData.get('salary') : 0,
       iban: isOrganizer ? formData.get('iban') : '',
     };
 
     try {
-      let response;
-      if(!isOrganizer){
-        response = await signUpUser(data.email, data.name, data.password, data.phone, data.birthDate, data.companyName, data.salary, data.iban);
+      setLoading(true);
+      if (!isOrganizer) {
+        await signUpUser(data.email, data.name, data.password, data.phone, data.birthDate, data.companyName, data.salary, data.iban);
+      } else {
+        await signUpEventOrganizer(data.email, data.name, data.password, data.phone, data.birthDate, data.companyName, data.salary, data.iban);
       }
-      else{
-        response = await signUpEventOrganizer(data.email, data.name, data.password, data.phone, data.birthDate, data.companyName, data.salary, data.iban);
-      }
-      console.log(response.data);
+      notify('Registration successful', NOTIFY_TYPES.SUCCESS);
+      navigate('/login');
     } catch (error) {
-      // Catch network errors and log
-      console.error('Registration error:', error);
-      // Display a generic error message
+      notifyError(error.response.data);
+    } finally {
+      setLoading(false);
     }
   };
 
-// ... other imports and code
+  // ... other imports and code
 
   return (
     <Grid
@@ -92,44 +99,10 @@ export default function RegisterUser() {
           <Grid container spacing={2}>
             {/* Common fields always full width when in 'User' mode, half width in 'Event Organizer' mode */}
             <Grid item xs={12} sm={isOrganizer ? 6 : 12}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="name"
-                label="Name Surname"
-                name="name"
-                autoComplete="name"
-                autoFocus
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="new-password"
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="phoneNumber"
-                label="Phone Number"
-                name="phoneNumber"
-                autoComplete="tel"
-              />
+              <TextField margin="normal" required fullWidth id="name" label="Name Surname" name="name" autoComplete="name" autoFocus />
+              <TextField margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" />
+              <TextField margin="normal" required fullWidth name="password" label="Password" type="password" id="password" autoComplete="new-password" />
+              <TextField margin="normal" required fullWidth id="phone" label="Phone Number" name="phone" autoComplete="tel" />
               <TextField
                 margin="normal"
                 required
@@ -148,47 +121,13 @@ export default function RegisterUser() {
             {/* Event Organizer-specific fields only render when in 'Event Organizer' mode */}
             {isOrganizer && (
               <Grid item xs={12} sm={6}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="companyName"
-                  label="Company Name"
-                  name="companyName"
-                  autoComplete="organization"
-                />
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="iban"
-                  label="IBAN"
-                  name="iban"
-                  autoComplete="iban"
-                />
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="salary"
-                  label="Salary"
-                  name="salary"
-                  type="number"
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                  }}
-                  autoComplete="salary"
-                />
+                <TextField margin="normal" required fullWidth id="companyName" label="Company Name" name="companyName" autoComplete="organization" />
+                <TextField margin="normal" required fullWidth id="iban" label="IBAN" name="iban" autoComplete="iban" />
               </Grid>
             )}
           </Grid>
 
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2, bgcolor: 'primary.main' }}
-          >
+          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2, bgcolor: 'primary.main' }}>
             Sign Up
           </Button>
           <Grid container justifyContent="flex-end">

@@ -37,6 +37,7 @@ export function notify(title, type, message = '') {
 }
 
 export function notifyError(data) {
+  console.log(data);
   notify(data?.result?.message, NOTIFY_TYPES.ERROR);
 
   if (data?.result?.code === ERROR_CODES.VALIDATION_FAILED) {
