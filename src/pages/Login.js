@@ -8,6 +8,7 @@ import { useAuthStore } from '../stores/Store';
 import { notify, notifyError } from '../utility/notify';
 import NOTIFY_TYPES from '../constants/notifyTypes';
 import { useLoadingStore } from '../stores/Loading';
+import { loginUser } from '../services/lib/auth';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ export default function Login() {
 
     try {
       console.log(data);
-      await loginFunction(data);
+      await loginUser(data);
       navigate('/');
     } catch (err) {
       console.log('sa', err);
