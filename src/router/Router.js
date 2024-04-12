@@ -1,24 +1,24 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom';
 import { AuthContainer } from '../components/auth/AuthContainer';
 import { UserLoader } from '../components/auth/UserLoader';
+import ErrorPage from '../components/ErrorPage';
 import Header from '../components/Header';
-import { Outlet } from 'react-router-dom';
 import Logout from '../components/Logout';
 import { PermissionContainer } from '../components/permission/PermissionContainer';
-import Login from '../pages/Login';
-import RegisterUser from '../pages/RegisterUser';
-import ForgotPassword from '../pages/ForgotPassword';
-import ResetPassword from '../pages/ResetPassword';
 import ROLES from '../constants/roles';
-import NotFound from '../pages/NotFound';
 import ChangePassword from '../pages/ChangePassword';
-import DashboardNavigator from '../pages/Home';
 import ContactPage from '../pages/ContactPage';
-import ErrorPage from '../components/ErrorPage';
 import Dashboard from '../pages/Dashboard';
+import EventDetailsPage from '../pages/EventDetailsPage';
+import ForgotPassword from '../pages/ForgotPassword';
+import DashboardNavigator from '../pages/Home';
+import Login from '../pages/Login';
 import MainEventsPage from '../pages/MainEventsPage';
-import { Navigate } from 'react-router-dom';
+import NotFound from '../pages/NotFound';
+import RegisterUser from '../pages/RegisterUser';
+import ResetPassword from '../pages/ResetPassword';
 import Wallet from '../pages/Wallet';
+
 
 export function Router() {
   return <RouterProvider router={router} />;
@@ -59,6 +59,18 @@ const router = createBrowserRouter([
       <div>
         <Header />
         <MainEventsPage />
+      </div>
+    ),
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: 'event/info/:eventId',
+    element: (
+      <div>
+        <UserLoader>
+          <Header />
+          <EventDetailsPage />
+        </UserLoader>
       </div>
     ),
     errorElement: <ErrorPage />,
