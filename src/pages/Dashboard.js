@@ -99,7 +99,7 @@ const handleVenueChange = (event) => {
   }
 };
 const handleSaveNewVenue = () => {
-  if (!newVenueName || !newVenueCity || newVenueAddress ||newVenueCapacity <= 0) {
+  if (!newVenueName || !newVenueCity || !newVenueAddress ||newVenueCapacity <= 0) {
     alert("Please fill all fields correctly.");
     return;
   }
