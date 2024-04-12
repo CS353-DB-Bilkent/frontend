@@ -118,6 +118,21 @@ const router = createBrowserRouter([
         ],
       },
       {
+        path: 'event-organizer/',
+        element: (
+          <PermissionContainer roles={[ROLES.EVENT_ORGANIZER]}>
+            <Outlet />
+          </PermissionContainer>
+        ),
+        children: [
+          {
+            path: 'dashboard/',
+            element: <Dashboard />,
+            errorElement: <Dashboard />,
+          },
+        ],
+      },
+      {
         path: 'super-admin/',
         element: (
           <PermissionContainer roles={[ROLES.SUPER_ADMIN]}>
