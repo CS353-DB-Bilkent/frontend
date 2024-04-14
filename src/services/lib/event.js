@@ -26,10 +26,21 @@ export async function searchEvents(searchTerm, artistName, brandName, venueName,
     orderDirection,
   });
 }
-export async function buyTicket(eventId, isBuyerVisible) {
+export async function buyTicket(userId, eventId, purchaseDate, price, ticketStatus, isBuyerVisible) {
   const url = `/event/${eventId}/buyTicket`;
   console.log("Calling API:", axiosInstance.defaults.baseURL + url);
-  return await axiosInstance.post(url, {isBuyerVisible});
+
+  const BuyTicketRequest = {
+    userId: userId,
+    eventId: eventId,
+    purchaseDate: purchaseDate,
+    price: price,
+    ticketStatus: ticketStatus,
+    buyerVisible: isBuyerVisible
+  };
+
+  console.log("Payload:", BuyTicketRequest);
+  return await axiosInstance.post(url, eventId, BuyTicketRequest);
 }
 
 

@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import Loading from '../components/loading/Loading';
 import { buyTicket, getEventById } from '../services/lib/event';
 import { useAuthStore } from '../stores/Store';
+import TICKET_STATUS from '../constants/ticketStatus';
 
 const EventDetailsPage = () => {
   const { eventId } = useParams();
@@ -26,7 +27,14 @@ const EventDetailsPage = () => {
       const isBuyerVisible = user !== null;
       console.log('isBuyerVisible:', isBuyerVisible)
       console.log('eventId:', eventId)
-      const result = await buyTicket(eventId, isBuyerVisible);
+      console.log('user:', user);
+
+      const userId = user.userId;
+      const purchaseDate = new Date().toISOString();
+      const price = event.ticketPrice;
+      const ticketStatus = TICKET_STATUS.RESERVED;
+
+      const result = await buyTicket(userId, eventId, purchaseDate, price, ticketStatus, isBuyerVisible);
       alert('Ticket purchased successfully: ' + result.data);
     } catch (error) {
       console.error('Failed to purchase ticket:', error);
