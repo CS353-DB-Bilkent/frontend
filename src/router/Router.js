@@ -18,7 +18,7 @@ import NotFound from '../pages/NotFound';
 import RegisterUser from '../pages/RegisterUser';
 import ResetPassword from '../pages/ResetPassword';
 import Wallet from '../pages/Wallet';
-
+import ProfilePage from '../pages/ProfilePage';
 
 export function Router() {
   return <RouterProvider router={router} />;
@@ -75,6 +75,16 @@ const router = createBrowserRouter([
     ),
     errorElement: <ErrorPage />,
   },
+  {
+    path: 'profile', //TODO Böyle olması gerektiğinden emin değilim
+    element: (
+      <PermissionContainer roles={[ROLES.USER, ROLES.EVENT_ORGANIZER, ROLES.ADMIN, ROLES.SUPER_ADMIN]}>
+      <ProfilePage />
+      </PermissionContainer>
+    ),
+    errorElement: <ErrorPage />,
+  },
+
   {
     paths: ['/', ''],
     element: (
