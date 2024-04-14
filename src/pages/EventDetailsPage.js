@@ -3,7 +3,7 @@ import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Loading from '../components/loading/Loading';
-import { getEventById } from '../services/lib/event';
+import { buyTicket, getEventById } from '../services/lib/event';
 import { useAuthStore } from '../stores/Store';
 
 const EventDetailsPage = () => {
@@ -21,15 +21,16 @@ const EventDetailsPage = () => {
   const handleCloseTicketsDialog = () => {
     setTicketsDialog(false);
   }
-  const handleBuyTicket = () => {
-    if (user && user.balance >= event.ticketPrice) {
-      //TODO: implement buy ticket
-    } 
-    else if (user && user.balance < event.ticketPrice) {
-      alert('Insufficient balance to purchase a ticket.');
-    }
-    else {
-      alert('An error occurred. Cannot purchase ticket.');
+  const handleBuyTicket = async () => {
+    try {
+      const isBuyerVisible = user !== null;
+      console.log('isBuyerVisible:', isBuyerVisible)
+      console.log('eventId:', eventId)
+      const result = await buyTicket(eventId, isBuyerVisible);
+      alert('Ticket purchased successfully: ' + result.data);
+    } catch (error) {
+      console.error('Failed to purchase ticket:', error);
+      alert('Failed to purchase ticket: ' + error.response.data);
     }
   };
 

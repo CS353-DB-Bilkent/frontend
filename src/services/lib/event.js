@@ -26,3 +26,37 @@ export async function searchEvents(searchTerm, artistName, brandName, venueName,
     orderDirection,
   });
 }
+export async function buyTicket(eventId, isBuyerVisible) {
+  const url = `/event/${eventId}/buyTicket`;
+  console.log("Calling API:", axiosInstance.defaults.baseURL + url);
+  return await axiosInstance.post(url, {isBuyerVisible});
+}
+
+
+export async function createEvent(eventData) {
+  return await axiosInstance.post('/event/create', eventData);
+}
+
+export async function createVenue(venueData) {
+  return await axiosInstance.post('event/createVenue', venueData);
+}
+
+// the followind endpoints do not exist, they need to be implemented in the backend
+export const fetchVenues = async () => {
+  return await axiosInstance.get('/event/venues');
+};
+export const fetchBrands = async () => {
+  return await axiosInstance.get('/event/brands');
+};
+
+export const createBrand = async (brandName) => {
+  return await axiosInstance.post('/event/createBrand', { name: brandName });
+};
+
+export const fetchEventPersons = async () => {
+  return await axiosInstance.get('/event/eventPersons');
+};
+
+export const createEventPerson = async (eventPersonName) => {
+  return await axiosInstance.post('/event/createEventPerson', { name: eventPersonName });
+};
