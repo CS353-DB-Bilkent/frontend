@@ -46,9 +46,6 @@ export default function RegisterUser() {
       setLoading(false);
     }
   };
-
-  // ... other imports and code
-
   return (
     <Grid
       container
@@ -103,19 +100,7 @@ export default function RegisterUser() {
               <TextField margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" />
               <TextField margin="normal" required fullWidth name="password" label="Password" type="password" id="password" autoComplete="new-password" />
               <TextField margin="normal" required fullWidth id="phone" label="Phone Number" name="phone" autoComplete="tel" />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="birthDate"
-                label="Birth Date"
-                name="birthDate"
-                type="date"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                autoComplete="bday"
-              />
+              <TextField margin="normal" required fullWidth id="birthDate" label="Birth Date" name="birthDate" type="date" InputLabelProps={{ shrink: true, }} autoComplete="bday" />
             </Grid>
 
             {/* Event Organizer-specific fields only render when in 'Event Organizer' mode */}
