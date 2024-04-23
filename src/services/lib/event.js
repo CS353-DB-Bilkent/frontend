@@ -28,7 +28,7 @@ export async function searchEvents(searchTerm, artistName, brandName, venueName,
 }
 export async function buyTicket(userId, eventId, purchaseDate, price, ticketStatus, isBuyerVisible) {
   const url = `/event/${eventId}/buyTicket`;
-  console.log("Calling API:", axiosInstance.defaults.baseURL + url);
+  console.log('Calling API:', axiosInstance.defaults.baseURL + url);
 
   const BuyTicketRequest = {
     userId: userId,
@@ -36,13 +36,12 @@ export async function buyTicket(userId, eventId, purchaseDate, price, ticketStat
     purchaseDate: purchaseDate,
     price: price,
     ticketStatus: ticketStatus,
-    buyerVisible: isBuyerVisible
+    buyerVisible: isBuyerVisible,
   };
 
-  console.log("Payload:", BuyTicketRequest);
-  return await axiosInstance.post(url, eventId, BuyTicketRequest);
+  console.log('Payload:', BuyTicketRequest);
+  return await axiosInstance.post(url, BuyTicketRequest);
 }
-
 
 export async function createEvent(eventData) {
   return await axiosInstance.post('/event/create', eventData);
