@@ -4,16 +4,20 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useQuery } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
+import { handleSaveNewBrand } from '../components/Brands';
 import Loading from '../components/loading/Loading';
+import { handleSaveNewVenue } from '../components/Venues';
+
+import { handleSaveNewEventPerson } from '../components/EventPersons';
 import EVENT_TYPE from '../constants/eventType';
-import { createBrand, createEvent, createEventPerson, createVenue, fetchBrands, fetchEventPersons, getMyEvents } from '../services/lib/event';
+import { createEvent, getAllBrands, getAllEventPersons, getAllVenues, getMyEvents } from '../services/lib/event';
 import { useAuthStore } from '../stores/Store';
+
 
 
 
 export default function Dashboard() {
   const [open, setOpen] = useState(false);
-  const [newVenueOpen, setNewVenueOpen] = useState(false);
   const [eventName, setEventName] = useState('');
   const [eventType, setEventType] = useState('');
   const [minAgeAllowed, setMinAgeAllowed] = useState('');
@@ -21,20 +25,183 @@ export default function Dashboard() {
   const [ticketPrice, setTicketPrice] = useState('');
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [venueName, setVenueName] = useState('');
   const [eventDetails, setEventDetails] = useState('');
   const [errors, setErrors] = useState({});
-  const [newVenueName, setNewVenueName] = useState('');
-  const [newVenueCity, setNewVenueCity] = useState('');
-  const [newVenueAddress, setNewVenueAddress] = useState('');
-  const [newVenueCapacity, setNewVenueCapacity] = useState('');
   const [venues, setVenues] = useState([]);
+  const [eventPersons, setEventPersons] = useState([]);
+  const [newVenueOpen, setNewVenueOpen] = useState(false);
+  const [venueDetails, setVenueDetails] = useState({
+    newVenueName: '',
+    newVenueCity: '',
+    newVenueAddress: '',
+    newVenueCapacity: ''
+  });
+  const [newBrandOpen, setNewBrandOpen] = useState(false);
+  const [newEventPersonOpen, setNewEventPersonOpen] = useState(false);
+  const [brands, setBrands] = useState([]);
   const [brandName, setBrandName] = useState('');
   const [eventPersonName, setEventPersonName] = useState('');
+  const [selectedVenueName, setSelectedVenueName] = useState('');
 
-    useEffect(() => {
-      console.log("Updated venues:", venues);
-  }, [venues]);
+  const handleNewVenueDialog = () => setNewVenueOpen(true);
+  const handleNewBrandDialog = () => setNewBrandOpen(true);
+  const handleNewEventPersonDialog = () => setNewEventPersonOpen(true);
+
+  const user = useAuthStore((s) => s.user);
+
+
+  const closeVenueModal = () => {
+    setNewVenueOpen(false);
+  };
+
+  const resetVenueForm = () => {
+    setVenueDetails({
+      newVenueName: '',
+      newVenueCity: '',
+      newVenueAddress: '',
+      newVenueCapacity: ''
+    });
+  };
+
+  const saveNewVenue = async () => {
+    await handleSaveNewVenue(venueDetails, setVenues, closeVenueModal, resetVenueForm);
+  };
+
+  // useEffect(() => {
+  //   const loadVenues = async () => {
+  //     console.log("Fetching venues...");
+  //     const loadedVenues = await fetchVenues();
+  //     console.log("Venues loaded:", loadedVenues);
+  //     setVenues(loadedVenues);
+  //   };
+
+  //   if (venues.length === 0) {
+  //     loadVenues();
+  //   }
+  // }, []);
+
+  const closeBrandModal = () => {
+    setNewBrandOpen(false);
+  };
+
+  const resetBrandForm = () => {
+    setBrandName({newBrandName: ''});
+  
+  };
+
+  const saveNewBrand = async () => {
+    await handleSaveNewBrand(brandName, setBrands, closeBrandModal, resetBrandForm);
+  };
+
+  // useEffect(() => {
+  //   const loadBrands = async () => {
+  //     console.log("Fetching brands...");
+  //     const loadedBrands = await fetchBrands();
+  //     console.log("Brands loaded:", loadedBrands);
+  //     setBrands(loadBrands);
+  //   };
+
+  //   if (brands.length === 0) {
+  //     loadBrands();
+  //   }
+  // }, []);
+
+  
+  const closeEventPersonModal = () => {
+    setNewEventPersonOpen(false);
+  };
+
+  const resetEventPersonForm = () => {
+    setEventPersonName({newEventPersonName: ''});
+  
+  };
+
+  const saveNewEventPerson = async () => {
+    await handleSaveNewEventPerson(eventPersonName, setEventPersons, closeEventPersonModal, resetEventPersonForm);
+  };
+
+  // useEffect(() => {
+  //   const loadEventPersons = async () => {
+  //     console.log("Fetching eventpersons...");
+  //     const loadedEventPersons = await fetchEventPersons();
+  //     console.log("EventPersons loaded:", loadedEventPersons);
+  //     setEventPersons(loadEventPersons);
+  //   };
+
+  //   if (eventPersons.length === 0) {
+  //     loadEventPersons();
+  //   }
+  // }, []);
+
+  const {
+    data: events,
+    isLoading: eventsLoading,
+    error: eventsError
+  } = useQuery({
+    queryKey: ['myEvents'],
+    queryFn: async () => {
+      console.log("Fetching events...");
+      const events = await getMyEvents();
+      console.log("Events fetched:", events);
+      return events;
+    },
+  });
+
+
+  const {
+    loading,
+    error,
+    data: initialVenues,
+  } = useQuery({
+    queryKey: ['initialVenues'],
+    queryFn: async () => getAllVenues(),
+  });
+
+  const {
+    data: initialBrands,
+  } = useQuery({
+    queryKey: ['initialBrands'],
+    queryFn: async () => getAllBrands(),
+  });
+
+  const {
+    data: initialEventPersons,
+  } = useQuery({
+    queryKey: ['initialEventPersons'],
+    queryFn: async () => getAllEventPersons(),
+  });
+
+  useEffect(() => {
+    if (initialVenues && initialVenues.data?.data) {
+      console.log("Loaded Venues:", initialVenues.data?.data);
+
+      setVenues(initialVenues.data.data);
+    }
+  }, [initialVenues]);
+  
+  useEffect(() => {
+    if (initialBrands && initialBrands.data?.data) {
+      console.log("Loaded Brands:", initialBrands.data?.data);
+
+      setBrands(initialBrands.data.data);
+    }
+  }, [initialBrands]);
+  
+  useEffect(() => {
+    if (initialEventPersons && initialEventPersons.data?.data) {
+      console.log("Loaded EventPersons:", initialEventPersons.data?.data);
+
+      setEventPersons(initialEventPersons.data.data);
+    }
+  }, [initialEventPersons]);
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  if (error) {
+    return <h1>{error}</h1>;
+  }
 
 
   const validate = () => {
@@ -45,7 +212,6 @@ export default function Dashboard() {
       formIsValid = false;
       tempErrors["eventName"] = "Event name is required.";
     }
-
     if (!eventType) {
       formIsValid = false;
       tempErrors["eventType"] = "Event type is required.";
@@ -54,13 +220,11 @@ export default function Dashboard() {
       formIsValid = false;
       tempErrors["minAgeAllowed"] = "Minimum age is required.";
     }
-
     if (!startDate || !endDate) {
       formIsValid = false;
       tempErrors["eventDates"] = "Start and end dates are required.";
     }
-
-    if (!venueName) {
+    if (!venueDetails.name) {
       formIsValid = false;
       tempErrors["venueName"] = "Venue is required.";
     }
@@ -77,12 +241,6 @@ export default function Dashboard() {
     return formIsValid;
   };
 
-  const user = useAuthStore((s) => s.user);
-  const { data: events, isLoading: eventsLoading, error: eventsError } = useQuery(['myEvents'], getMyEvents);
-  // these will give errors right now as the endpoints do not exist yet
-  const { data: brands, refetch: refetchBrands } = useQuery(['brands'], fetchBrands);
-  const { data: eventPersons, refetch: refetchEventPersons } = useQuery(['eventPersons'], fetchEventPersons);
-  // add fetching new events too
 
   const handleDialogToggle = () => setOpen(!open);
   const handleSave = async () => {
@@ -98,7 +256,7 @@ export default function Dashboard() {
           eventType: eventType,
           minAgeAllowed: parseInt(minAgeAllowed, 10),
           userId: user.id,
-          venueId: venues.find(v => v.name === venueName)?.id,
+          //venueId: venues.find(v => v.name === venueName)?.id,
           brandId: brands.find(b => b.name === brandName)?.id,
           bName: brandName,
           eventPersonId: eventPersons.find(p => p.name === eventPersonName)?.id,
@@ -117,71 +275,7 @@ export default function Dashboard() {
       }
     }
   };
-  const handleVenueChange = (event) => {
-    const value = event.target.value;
-    if (value === "add-new") {
-      setNewVenueOpen(true);
-    } else {
-      setVenueName(value);
-    }
-  };
-
-  const handleSaveNewVenue = async () => {
-    if (!newVenueName || !newVenueCity || !newVenueAddress || newVenueCapacity <= 0) {
-      alert("Please fill all fields correctly!!");
-      return;
-    }
   
-    const newVenue = {
-      venueName: newVenueName,
-      venueCity: newVenueCity,
-      venueAddress: newVenueAddress,
-      venueCapacity: parseInt(newVenueCapacity, 10)
-    };
-  
-    try {
-      const response = await createVenue(newVenue);
-      console.log("Venue created successfully :) with data:", response.data);
-      alert('Venue created successfully :)');
-      const updatedVenue = response.data.operationResultData;
-
-      if (!updatedVenue || updatedVenue.venueId === null) {
-        alert('Invalid venue data received. Please try again.');
-        console.error('Invalid venue data:', updatedVenue);
-        return;
-    }
-
-      setVenues(prevVenues => [...prevVenues, updatedVenue]);
-      setVenueName(updatedVenue.venueName);
-      setNewVenueOpen(false);
-      setNewVenueName('');
-      setNewVenueCity('');
-      setNewVenueAddress('');
-      setNewVenueCapacity('');
-      console.log(venues);
-    } 
-    catch (error) {
-      console.error("Error creating venue:", error);
-      alert(':( Failed to create venue: ' + error.response.data.message || error.message);
-    }
-  };
-
-
-  const handleAddBrand = async () => {
-    if (brandName) {
-        await createBrand(brandName);
-        setBrandName('');
-        refetchBrands();
-    }
-};
-
-const handleAddEventPerson = async () => {
-    if (eventPersonName) {
-        await createEventPerson(eventPersonName);
-        setEventPersonName('');
-        refetchEventPersons();
-    }
-};
 
   if (eventsLoading) return <Loading />;
   if (eventsError) return <Typography color="error">Error: {eventsError.message}</Typography>;
@@ -212,7 +306,7 @@ const handleAddEventPerson = async () => {
         <DialogContent sx={{ p: 3 }}>
           <DialogContentText sx={{ mb: 2, textAlign: 'center' }}>Create a New Event</DialogContentText>
           <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12}>
               <TextField
                 autoFocus
                 margin="dense"
@@ -266,20 +360,37 @@ const handleAddEventPerson = async () => {
                 InputProps={{ inputProps: { min: 0 } }}
               />
             </Grid>
-            <Grid item xs={12}  md={6}>
+            <Grid item xs={12} md={6}>
               <TextField
-                  autoFocus
-                  margin="dense"
-                  id="eventPersonName"
-                  label="Event Person"
-                  type="text"
-                  fullWidth
-                  value={eventPersonName}
-                  onChange={(e) => setEventPersonName(e.target.value)}
-                  onBlur={handleAddEventPerson}
-                  placeholder="Type to add an event person"
-                  variant="outlined"
-              />  
+                margin="dense"
+                id="numberOfTickets"
+                label="Number of Tickets"
+                type="number"
+                required
+                fullWidth
+                value={numberOfTickets}
+                onChange={(e) => setNumberOfTickets(e.target.value)}
+                variant="outlined"
+                error={!!errors.numberOfTickets}
+                helperText={errors.numberOfTickets || ""} 
+                InputProps={{ inputProps: { min: 0 } }}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                margin="dense"
+                id="ticketPrice"
+                label="Ticket price"
+                type="number"
+                required
+                fullWidth
+                value={ticketPrice}
+                onChange={(e) => setTicketPrice(e.target.value)}
+                variant="outlined"
+                error={!!errors.ticketPrice}
+                helperText={errors.ticketPrice || ""} 
+                InputProps={{ inputProps: { min: 0 } }}
+              />
             </Grid>
             <Grid item xs={12} md={6}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -315,75 +426,63 @@ const handleAddEventPerson = async () => {
                         margin="dense"
                     />
                 )}
-            />
-            </LocalizationProvider>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                margin="dense"
-                id="numberOfTickets"
-                label="Number of Tickets"
-                type="number"
-                required
-                fullWidth
-                value={numberOfTickets}
-                onChange={(e) => setNumberOfTickets(e.target.value)}
-                variant="outlined"
-                error={!!errors.numberOfTickets}
-                helperText={errors.numberOfTickets || ""} 
-                InputProps={{ inputProps: { min: 0 } }}
               />
+              </LocalizationProvider>
             </Grid>
+         
             <Grid item xs={12} md={6}>
-              <TextField
-                margin="dense"
-                id="ticketPrice"
-                label="Ticket price"
-                type="number"
-                required
-                fullWidth
-                value={ticketPrice}
-                onChange={(e) => setTicketPrice(e.target.value)}
-                variant="outlined"
-                error={!!errors.ticketPrice}
-                helperText={errors.ticketPrice || ""} 
-                InputProps={{ inputProps: { min: 0 } }}
-              />
-            </Grid>
-            <Grid item xs={12}  md={6}>
-              <FormControl fullWidth margin="dense">
-                <InputLabel id="venue-label">Venue</InputLabel>
+              <FormControl fullWidth>
+                <InputLabel>Event Person</InputLabel>
                 <Select
-                  labelId="venue-label"
-                  required
-                  id="venueName"
-                  value={venueName}
-                  onChange={handleVenueChange}
-                  label="Venue"
+                  value={eventPersonName}
+                  onChange={(e) => setEventPersonName(e.target.value)}
+                  label="Event Person"
                 >
-                  {venues.map((venue) => (
-                    <MenuItem key={venue.id} value={venue.name}>{venue.name}</MenuItem>
+                  {eventPersons.map((person) => (
+                    <MenuItem key={person.eventPersonId} value={person.eventPersonName}>{person.eventPersonName}</MenuItem>
                   ))}
-                  <MenuItem value="add-new">Add New Venue</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField
-                  autoFocus
-                  margin="dense"
-                  id="brandName"
-                  label="Brand"
-                  type="text"
-                  fullWidth
-                  value={brandName}
-                  onChange={(e) => setBrandName(e.target.value)}
-                  onBlur={handleAddBrand}
-                  placeholder="Type to add a brand"
-                  variant="outlined"
-              />  
+              <Button onClick={handleNewEventPersonDialog}>Add New Event Person</Button>
             </Grid>
-         
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>Venue</InputLabel>
+                <Select
+                  value={selectedVenueName}
+                  onChange={(e) => setSelectedVenueName(e.target.value)}
+                  label="Venue"
+                >
+                  {venues.map((venue) => (
+                    <MenuItem key={venue.venueId} value={venue.venueName}>{venue.venueName}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={6}> 
+              <Button onClick={handleNewVenueDialog}>Add New Venue</Button>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+            <FormControl fullWidth>
+              <InputLabel>Brand</InputLabel>
+              <Select
+                value={brandName}
+                onChange={(e) => setBrandName(e.target.value)}
+                label="Brand"
+              >
+                {brands.map((brand) => (
+                  <MenuItem key={brand.brandId} value={brand.brandName}>{brand.brandName}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={6}>
+          <Button onClick={handleNewBrandDialog}>Add New Brand</Button>
+ </Grid>
+            
             <Grid item xs={12}>
               <TextField
                   autoFocus
@@ -397,24 +496,6 @@ const handleAddEventPerson = async () => {
                   variant="outlined"
               />  
             </Grid>
-         
-            {/* <Grid item xs={12}>
-              <FormControl fullWidth margin="dense">
-                <InputLabel id="brand-label">Brand</InputLabel>
-                <Select
-                  labelId="brand-label"
-                  id="brandName"
-                  value={brandName}
-                  onChange={(e) => setBrandName(e.target.value)}
-                  label="Brand"
-                >
-                  {brands.map((brand) => (
-                    <MenuItem key={brand.id} value={brand.name}>{brand.name}</MenuItem>
-                  ))}
-                  <MenuItem value="add-new">Add New Brand</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid> */}
           </Grid>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center' }}>
@@ -433,9 +514,9 @@ const handleAddEventPerson = async () => {
             type="text"
             required
             fullWidth
-            value={newVenueName}
-            onChange={(e) => setNewVenueName(e.target.value)}
-          />
+            value={venueDetails.name}
+            onChange={(e) => setVenueDetails({...venueDetails, newVenueName: e.target.value})}
+            />
           <TextField
             margin="dense"
             id="newVenueCity"
@@ -443,8 +524,8 @@ const handleAddEventPerson = async () => {
             type="text"
             fullWidth
             required
-            value={newVenueCity}
-            onChange={(e) => setNewVenueCity(e.target.value)}
+            value={venueDetails.city}
+            onChange={(e) => setVenueDetails({...venueDetails, newVenueCity: e.target.value})}
           />
           <TextField
             margin="dense"
@@ -453,8 +534,8 @@ const handleAddEventPerson = async () => {
             type="text"
             fullWidth
             required
-            value={newVenueAddress}
-            onChange={(e) => setNewVenueAddress(e.target.value)}
+            value={venueDetails.address}
+            onChange={(e) => setVenueDetails({...venueDetails, newVenueAddress: e.target.value})}
           />
           <TextField
             margin="dense"
@@ -463,16 +544,16 @@ const handleAddEventPerson = async () => {
             type="number"
             fullWidth
             required
-            value={newVenueCapacity}
-            onChange={(e) => setNewVenueCapacity(e.target.value)}
+            value={venueDetails.capacity}
+            onChange={(e) => setVenueDetails({...venueDetails, newVenueCapacity: e.target.value})}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setNewVenueOpen(false)}>Cancel</Button>
-          <Button onClick={handleSaveNewVenue}>Add Venue</Button>
+          <Button onClick={saveNewVenue}>Add Venue</Button>
         </DialogActions>
       </Dialog>
-      {/* <Dialog open={newBrandOpen} onClose={handleNewBrandToggle}>
+      <Dialog open={newBrandOpen} onClose={() => setNewBrandOpen(false)}>
       <DialogTitle>Add New Brand</DialogTitle>
       <DialogContent>
         <TextField
@@ -488,10 +569,30 @@ const handleAddEventPerson = async () => {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleNewBrandToggle}>Cancel</Button>
-        <Button onClick={handleSaveNewBrand}>Add Brand</Button>
+        <Button onClick={() => setNewBrandOpen(false)}>Cancel</Button>
+        <Button onClick={saveNewBrand}>Add Brand</Button>
       </DialogActions>
-    </Dialog> */}
+    </Dialog>
+    <Dialog open={newEventPersonOpen} onClose={() => setNewEventPersonOpen(false)}>
+      <DialogTitle>Add New EventPerson</DialogTitle>
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="eventPersonName"
+          label="EventPerson Name"
+          type="text"
+          required
+          fullWidth
+          value={eventPersonName}
+          onChange={(e) => setEventPersonName(e.target.value)}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setNewEventPersonOpen(false)}>Cancel</Button>
+        <Button onClick={saveNewEventPerson}>Add EventPerson</Button>
+      </DialogActions>
+    </Dialog>
     </Grid>
   );
 }
