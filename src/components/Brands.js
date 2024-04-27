@@ -35,7 +35,6 @@ catch (error) {
 }
 };
 
-
 // export const fetchBrands = async () => {
 //     try {
 //         console.log("Fetching brands from API");

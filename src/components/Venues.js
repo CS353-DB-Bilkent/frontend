@@ -1,5 +1,4 @@
 import { createVenue } from '../services/lib/event';
-
   export const handleSaveNewVenue = async (venueDetails, setVenues, closeVenueModal, resetVenueForm) => {
     const { newVenueName, newVenueCity, newVenueAddress, newVenueCapacity } = venueDetails;
 

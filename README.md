@@ -1,4 +1,4 @@
-## Internship Management System Frontend
+## TicketBase Frontend
 
 #### Starting the project
 

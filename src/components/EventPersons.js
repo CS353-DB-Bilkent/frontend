@@ -1,6 +1,4 @@
 import { createEventPerson } from '../services/lib/event';
-
-  
 export const handleSaveNewEventPerson = async (newEventPersonName, setEventPersons, closeEventPersonModal, resetEventPersonForm) => {
     if (!newEventPersonName) {
         alert("Please fill all fields correctly!!");
