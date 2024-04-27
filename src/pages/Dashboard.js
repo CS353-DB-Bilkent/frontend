@@ -28,6 +28,7 @@ export default function Dashboard() {
   const [eventDetails, setEventDetails] = useState('');
   const [errors, setErrors] = useState({});
   const [venues, setVenues] = useState([]);
+  const [events, setEvents] = useState([]);
   const [eventPersons, setEventPersons] = useState([]);
   const [newVenueOpen, setNewVenueOpen] = useState(false);
   const [venueDetails, setVenueDetails] = useState({
@@ -40,6 +41,7 @@ export default function Dashboard() {
   const [newEventPersonOpen, setNewEventPersonOpen] = useState(false);
   const [brands, setBrands] = useState([]);
   const [brandName, setBrandName] = useState('');
+  const [venueName, setVenueName] = useState('');
   const [eventPersonName, setEventPersonName] = useState('');
   const [selectedVenueName, setSelectedVenueName] = useState('');
 
@@ -134,17 +136,12 @@ export default function Dashboard() {
   // }, []);
 
   const {
-    data: events,
-    isLoading: eventsLoading,
-    error: eventsError
+    data: myEvents,
+    eventsLoading,
+    eventsError,
   } = useQuery({
     queryKey: ['myEvents'],
-    queryFn: async () => {
-      console.log("Fetching events...");
-      const events = await getMyEvents();
-      console.log("Events fetched:", events);
-      return events;
-    },
+    queryFn: async () => getMyEvents(),
   });
 
 
@@ -170,6 +167,13 @@ export default function Dashboard() {
     queryKey: ['initialEventPersons'],
     queryFn: async () => getAllEventPersons(),
   });
+
+  useEffect(() => {
+    if (myEvents && myEvents.data?.data) {
+      console.log("My events:", myEvents.data?.data);
+      setEvents(myEvents.data.data);
+    }
+  }, [myEvents]);
 
   useEffect(() => {
     if (initialVenues && initialVenues.data?.data) {
@@ -256,10 +260,10 @@ export default function Dashboard() {
           eventType: eventType,
           minAgeAllowed: parseInt(minAgeAllowed, 10),
           userId: user.id,
-          //venueId: venues.find(v => v.name === venueName)?.id,
-          brandId: brands.find(b => b.name === brandName)?.id,
+          venueId: venues.find(v => v.venueName === venueName)?.venueId,
+          brandId: brands.find(b => b.brandName === brandName)?.brandId,
           bName: brandName,
-          eventPersonId: eventPersons.find(p => p.name === eventPersonName)?.id,
+          eventPersonId: eventPersons.find(p => p.eventPersonName === eventPersonName)?.eventPersonId,
           eventPersonName: eventPersonName,
 
           
@@ -291,11 +295,14 @@ export default function Dashboard() {
         <Paper sx={{ p: 2 }}>
           <Typography variant="h6">Your Events:</Typography>
           <Grid container spacing={2}>
+
             {events && Array.isArray(events) ? events.map((event) => (
               <Grid item key={event.id} xs={12} md={4}>
                 <Paper elevation={2} sx={{ p: 2 }}>
                   <Typography variant="h6">{event.name}</Typography>
-                  <Typography variant="body2">Location: {event.location}</Typography>
+                  <Typography variant="body2">Details: {event.details}</Typography>
+                  <Typography variant="body2">Tickets Remaining: {event.numberOfTickets}</Typography>                  
+
                 </Paper>
               </Grid>
             )) : <Typography>No events found or data is not in the expected format.</Typography>}
@@ -480,8 +487,8 @@ export default function Dashboard() {
             </FormControl>
           </Grid>
           <Grid item xs={12} md={6}>
-          <Button onClick={handleNewBrandDialog}>Add New Brand</Button>
- </Grid>
+            <Button onClick={handleNewBrandDialog}>Add New Brand</Button>
+          </Grid>
             
             <Grid item xs={12}>
               <TextField
@@ -554,45 +561,45 @@ export default function Dashboard() {
         </DialogActions>
       </Dialog>
       <Dialog open={newBrandOpen} onClose={() => setNewBrandOpen(false)}>
-      <DialogTitle>Add New Brand</DialogTitle>
-      <DialogContent>
-        <TextField
-          autoFocus
-          margin="dense"
-          id="brandName"
-          label="Brand Name"
-          type="text"
-          required
-          fullWidth
-          value={brandName}
-          onChange={(e) => setBrandName(e.target.value)}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setNewBrandOpen(false)}>Cancel</Button>
-        <Button onClick={saveNewBrand}>Add Brand</Button>
-      </DialogActions>
-    </Dialog>
-    <Dialog open={newEventPersonOpen} onClose={() => setNewEventPersonOpen(false)}>
-      <DialogTitle>Add New EventPerson</DialogTitle>
-      <DialogContent>
-        <TextField
-          autoFocus
-          margin="dense"
-          id="eventPersonName"
-          label="EventPerson Name"
-          type="text"
-          required
-          fullWidth
-          value={eventPersonName}
-          onChange={(e) => setEventPersonName(e.target.value)}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setNewEventPersonOpen(false)}>Cancel</Button>
-        <Button onClick={saveNewEventPerson}>Add EventPerson</Button>
-      </DialogActions>
-    </Dialog>
+        <DialogTitle>Add New Brand</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="brandName"
+            label="Brand Name"
+            type="text"
+            required
+            fullWidth
+            value={brandName}
+            onChange={(e) => setBrandName(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setNewBrandOpen(false)}>Cancel</Button>
+          <Button onClick={saveNewBrand}>Add Brand</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={newEventPersonOpen} onClose={() => setNewEventPersonOpen(false)}>
+        <DialogTitle>Add New EventPerson</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="eventPersonName"
+            label="EventPerson Name"
+            type="text"
+            required
+            fullWidth
+            value={eventPersonName}
+            onChange={(e) => setEventPersonName(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setNewEventPersonOpen(false)}>Cancel</Button>
+          <Button onClick={saveNewEventPerson}>Add EventPerson</Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 }
