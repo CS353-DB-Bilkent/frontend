@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Fade, Backdrop, Box, Typography, Button, List, ListItem, ListItemText, Divider, Rating, TextField} from '@mui/material';
+import { Modal, Fade, Backdrop, Box, Typography, Button, List, ListItem, ListItemText, Divider, Rating, TextField } from '@mui/material';
 import { getEventById, getMyTickets, postReview, refundTicket } from '../services/lib/event';
 import EVENT_STATUS from '../constants/eventStatus';
 import { useLoadingStore } from '../stores/Loading';
+
+import { notify, notifyError } from '../utility/notify';
+import NOTIFY_TYPES from '../constants/notifyTypes';
 
 function ReviewModal({ open, handleClose, event, postReview }) {
   const [rating, setRating] = useState(0);
@@ -23,9 +26,9 @@ function ReviewModal({ open, handleClose, event, postReview }) {
       rating,
       comment,
     });
+
     handleClose();
   };
-
 
   return (
     <Modal
@@ -34,7 +37,6 @@ function ReviewModal({ open, handleClose, event, postReview }) {
       open={open}
       onClose={handleClose}
       closeAfterTransition
-      BackdropComponent={Backdrop}
       BackdropProps={{
         timeout: 500,
       }}
@@ -59,11 +61,7 @@ function ReviewModal({ open, handleClose, event, postReview }) {
           <Typography variant="h6" component="h2">
             Leave a review for {event.name}
           </Typography>
-          <Rating
-            name="simple-controlled"
-            value={rating}
-            onChange={handleRatingChange}
-          />
+          <Rating name="simple-controlled" value={rating} onChange={handleRatingChange} />
           <TextField
             fullWidth
             multiline
@@ -74,11 +72,7 @@ function ReviewModal({ open, handleClose, event, postReview }) {
             value={comment}
             onChange={handleCommentChange}
           />
-          <Button
-            variant="contained"
-            sx={{ mt: 2 }}
-            onClick={handleSubmitReview}
-          >
+          <Button variant="contained" sx={{ mt: 2 }} onClick={handleSubmitReview}>
             Post
           </Button>
         </Box>
@@ -87,7 +81,7 @@ function ReviewModal({ open, handleClose, event, postReview }) {
   );
 }
 
-export default function MyTickets({user}) {
+export default function MyTickets({ user }) {
   const [tickets, setTickets] = useState([]);
   const [events, setEvents] = useState({});
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -100,29 +94,23 @@ export default function MyTickets({user}) {
           const tickets = response.data.data;
           setTickets(tickets); // Set the tickets state
 
-          const uniqueEventIds = [...new Set(tickets.map(ticket => ticket.eventId))];
+          const uniqueEventIds = [...new Set(tickets.map((ticket) => ticket.eventId))];
           const eventsHash = {};
           for (const eventId of uniqueEventIds) {
             try {
               const eventResponse = await getEventById(eventId);
-              //console.log(eventResponse); // Log to inspect the structure
               eventsHash[eventResponse.data.data.eventId] = eventResponse.data.data;
-              //console.log(eventResponse.data);
-              //console.log(eventResponse.data.data);
-              //console.log(eventsHash[eventResponse.data.data.eventId]);
             } catch (error) {
               console.error(`Failed to fetch details for event ID ${eventId}:`, error);
-              // Handle the error, for example by setting a flag or default data
             }
           }
           setEvents(eventsHash); // Update the events state
         })
-        .catch(error => {
+        .catch((error) => {
           console.error('Error fetching tickets:', error);
         });
     }
   }, [user]);
-
 
   const handleOpenReviewModal = (event) => {
     setSelectedEvent(event);
@@ -132,47 +120,41 @@ export default function MyTickets({user}) {
   const handleCloseReviewModal = () => {
     setReviewModalOpen(false);
   };
+
   const handleRefund = async (ticketId) => {
     try {
-      // Confirmation before refunding
       if (!window.confirm('Are you sure you want to refund the ticket?')) {
         return;
       }
 
-      // Send the request to the refund endpoint
       await refundTicket(ticketId);
 
-      // Filter out the refunded ticket from the state
-      const updatedTickets = tickets.filter(ticket => ticket.ticketId !== ticketId);
+      const updatedTickets = tickets.filter((ticket) => ticket.ticketId !== ticketId);
       setTickets(updatedTickets);
 
       // Notify the user
-      alert('The ticket has been refunded.');
+      notify('The ticket has been refunded.', NOTIFY_TYPES.SUCCESS);
     } catch (error) {
-      console.error('Error refunding the ticket:', error);
-      // Handle error state appropriately
-      alert('There was an error processing your refund. Please try again later.');
+      notifyError(error.response.data);
     }
   };
+
   const handlePostReview = async (reviewData) => {
     try {
-      // Here we destructure the eventId from the reviewData to pass it separately if needed
       const { eventId, ...restOfReviewData } = reviewData;
-      console.log(reviewData);
+
       await postReview({
         ...restOfReviewData,
         userId: user.userId,
+        eventId,
       });
 
-      // You may want to update state or do something else upon successful posting
-      // setReviews([...reviews, response]);
-
-      alert('Review posted successfully');
+      notify('Review posted successfully', NOTIFY_TYPES.SUCCESS);
     } catch (error) {
-      console.error('Error posting review:', error);
-      alert('An error occurred while posting the review.');
+      notifyError(error.response.data);
     }
   };
+
   return (
     <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
       <Typography variant="h6" component="div" sx={{ p: 2 }}>
@@ -180,32 +162,28 @@ export default function MyTickets({user}) {
       </Typography>
       <List>
         {tickets.map((ticket) => (
-          <ListItem key={ticket.ticketId} secondaryAction={
-            <>
-              <Button
-                sx={{ mx: 1 }}
-                variant="outlined"
-                onClick={() => handleRefund(ticket.ticketId)}
-                disabled={ticket.ticketStatus !== 'RESERVED'}
-              >
-                Refund
-              </Button>
-              {Object.keys(events).length > 0 ? (
-                <Button
-                  sx={{ mx: 1 }}
-                  variant="outlined"
-                  onClick={() => handleOpenReviewModal(events[ticket.eventId])}
-                  disabled={!events[ticket.eventId] } // || events[ticket.eventId].eventStatus === EVENT_STATUS.ACTIVE //TODO
-                >
-                  Review
+          <ListItem
+            key={ticket.ticketId}
+            secondaryAction={
+              <>
+                <Button sx={{ mx: 1 }} variant="outlined" onClick={() => handleRefund(ticket.ticketId)} disabled={ticket.ticketStatus !== 'RESERVED'}>
+                  Refund
                 </Button>
-              ) : (
-                <Typography sx={{ mx: 1 }}>
-                  Loading event details...
-                </Typography>
-              )}
-            </>
-          }>
+                {Object.keys(events).length > 0 ? (
+                  <Button
+                    sx={{ mx: 1 }}
+                    variant="outlined"
+                    onClick={() => handleOpenReviewModal(events[ticket.eventId])}
+                    disabled={!events[ticket.eventId]} // || events[ticket.eventId].eventStatus === EVENT_STATUS.ACTIVE //TODO
+                  >
+                    Review
+                  </Button>
+                ) : (
+                  <Typography sx={{ mx: 1 }}>Loading event details...</Typography>
+                )}
+              </>
+            }
+          >
             <ListItemText
               primary={events[ticket.eventId]?.name || 'Loading event details...'}
               secondary={`Purchased on: ${new Date(ticket.purchaseDate).toLocaleDateString()} - Price: ${ticket.price}`}
@@ -213,14 +191,7 @@ export default function MyTickets({user}) {
           </ListItem>
         ))}
       </List>
-      {selectedEvent && (
-        <ReviewModal
-          open={reviewModalOpen}
-          handleClose={handleCloseReviewModal}
-          event={selectedEvent}
-          postReview={handlePostReview}
-        />
-      )}
+      {selectedEvent && <ReviewModal open={reviewModalOpen} handleClose={handleCloseReviewModal} event={selectedEvent} postReview={handlePostReview} />}
     </Box>
   );
 }

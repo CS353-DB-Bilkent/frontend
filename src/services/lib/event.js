@@ -39,11 +39,12 @@ export async function reportEvent(eventId) {
 }
 export async function postReview(reviewData) {
   try {
-    return await axiosInstance.post(`/reviews/post`, {
+    return await axiosInstance.post(`/event/postReview`, {
       rating: reviewData.rating,
       description: reviewData.comment,
-      reviewDate: new Date().toISOString().split('T')[0], // Review date is today
+      reviewDate: new Date(), // Review date is today
       userId: reviewData.userId,
+      eventId: reviewData.eventId,
     });
   } catch (error) {
     console.error('Error posting review:', error);
