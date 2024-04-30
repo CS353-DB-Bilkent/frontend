@@ -1,17 +1,18 @@
-import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, List, ListItem, ListItemText } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Loading from '../components/loading/Loading';
-import { buyTicket, getEventById } from '../services/lib/event';
-import { useAuthStore } from '../stores/Store';
-import TICKET_STATUS from '../constants/ticketStatus';
-import { notify, notifyError } from '../utility/notify';
 import NOTIFY_TYPES from '../constants/notifyTypes';
-
+import TICKET_STATUS from '../constants/ticketStatus';
+import { buyTicket, getEventAttendees, getEventById, getReviews } from '../services/lib/event';
+import { useAuthStore } from '../stores/Store';
+import { notify, notifyError } from '../utility/notify';
 const EventDetailsPage = () => {
   const { eventId } = useParams();
   const [event, setEvent] = useState(null);
+  const [attendees, setAttendees] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [ticketsDialog, setTicketsDialog] = useState(false);
   const [buyerVisible, setBuyerVisible] = useState(false);
@@ -51,6 +52,11 @@ const EventDetailsPage = () => {
         setLoading(true);
         const response = await getEventById(eventId);
         setEvent(response.data.data);
+        const attendeesResponse = await getEventAttendees(eventId);
+        setAttendees(attendeesResponse.data.data);
+        const reviewsResponse = await getReviews(eventId);
+        console.log(reviewsResponse.data.data);
+        setReviews(reviewsResponse.data.data);
 
         setLoading(false);
       } catch (error) {
@@ -92,6 +98,26 @@ const EventDetailsPage = () => {
         <Button variant="contained" color="primary" onClick={handleOpenTicketsDialog}>
           See Tickets
         </Button>
+  
+        <Typography variant="body1">Who is going to this event:</Typography>
+        <List>
+          {attendees.map((attendee, index) => (
+            <ListItem key={index}>
+              <ListItemText primary={attendee.name} />
+            </ListItem>
+          ))}
+        </List>
+        <Typography variant="body1">Reviews for the event:</Typography>
+        <List>
+          {reviews.map((review, index) => (
+            <ListItem key={index}>
+              <ListItemText 
+                primary={`${review.userInitials} - Rating: ${review.rating}`} 
+                secondary={review.description} 
+              />
+            </ListItem>
+          ))}
+        </List>
         <Dialog open={ticketsDialog} onClose={handleCloseTicketsDialog}>
           <DialogTitle>Tickets for {event.name}</DialogTitle>
           <DialogContent>

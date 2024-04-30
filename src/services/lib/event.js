@@ -118,3 +118,10 @@ export async function getEventPerson(eventId) {
 export async function createEventPerson(eventPersonName) {
   return await axiosInstance.post('/event/createEventPerson', { name: eventPersonName });
 }
+
+export async function getEventAttendees(eventId) {
+  return await axiosInstance.get(`/event/${eventId}/getEventAttendees`);
+}
+export async function getReviews(eventId) {
+  return await axiosInstance.get(`/event/${eventId}/getReviews`);
+}
