@@ -41,9 +41,11 @@ export default function Dashboard() {
   const [newEventPersonOpen, setNewEventPersonOpen] = useState(false);
   const [brands, setBrands] = useState([]);
   const [brandName, setBrandName] = useState('');
-  const [venueName, setVenueName] = useState('');
   const [eventPersonName, setEventPersonName] = useState('');
-  const [selectedVenueName, setSelectedVenueName] = useState('');
+  const [selectedVenueId, setSelectedVenueId] = useState('');
+  const [selectedBrandId, setSelectedBrandId] = useState('');
+  const [selectedEventPersonId, setSelectedEventPersonId] = useState('');
+
 
   const handleNewVenueDialog = () => setNewVenueOpen(true);
   const handleNewBrandDialog = () => setNewBrandOpen(true);
@@ -248,7 +250,12 @@ export default function Dashboard() {
 
   const handleDialogToggle = () => setOpen(!open);
   const handleSave = async () => {
-    if (validate()) {
+
+    console.log("helllooooooooo");
+    console.log("user id: ", user.userId     );
+
+    
+    if (validate) {
       try {
         const eventData = {
           name: eventName,
@@ -259,16 +266,13 @@ export default function Dashboard() {
           numberOfTickets: parseInt(numberOfTickets, 10),
           eventType: eventType,
           minAgeAllowed: parseInt(minAgeAllowed, 10),
-          userId: user.id,
-          venueId: venues.find(v => v.venueName === venueName)?.venueId,
-          brandId: brands.find(b => b.brandName === brandName)?.brandId,
-          bName: brandName,
-          eventPersonId: eventPersons.find(p => p.eventPersonName === eventPersonName)?.eventPersonId,
-          eventPersonName: eventPersonName,
+          userId: user.userId,
+          venueId: selectedVenueId,
+          brandId: selectedBrandId,
+          eventPersonId: selectedEventPersonId,
+          };
 
-          
-      };
-  
+        console.log("Event Data:", eventData);
         const result = await createEvent(eventData);
         console.log('Event created successfully:', result);
         alert('Event created successfully!');
@@ -441,12 +445,12 @@ export default function Dashboard() {
               <FormControl fullWidth>
                 <InputLabel>Event Person</InputLabel>
                 <Select
-                  value={eventPersonName}
-                  onChange={(e) => setEventPersonName(e.target.value)}
+                  value={selectedEventPersonId}
+                  onChange={(e) => setSelectedEventPersonId(e.target.value)}
                   label="Event Person"
                 >
                   {eventPersons.map((person) => (
-                    <MenuItem key={person.eventPersonId} value={person.eventPersonName}>{person.eventPersonName}</MenuItem>
+                    <MenuItem key={person.eventPersonId} value={person.eventPersonId}>{person.eventPersonName}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -458,12 +462,12 @@ export default function Dashboard() {
               <FormControl fullWidth>
                 <InputLabel>Venue</InputLabel>
                 <Select
-                  value={selectedVenueName}
-                  onChange={(e) => setSelectedVenueName(e.target.value)}
+                  value={selectedVenueId}
+                  onChange={(e) => setSelectedVenueId(e.target.value)}
                   label="Venue"
                 >
                   {venues.map((venue) => (
-                    <MenuItem key={venue.venueId} value={venue.venueName}>{venue.venueName}</MenuItem>
+                    <MenuItem key={venue.venueId} value={venue.venueId}>{venue.venueName}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -476,13 +480,19 @@ export default function Dashboard() {
             <FormControl fullWidth>
               <InputLabel>Brand</InputLabel>
               <Select
-                value={brandName}
-                onChange={(e) => setBrandName(e.target.value)}
+                value={selectedBrandId}
+                onChange={(e) => {
+                  console.log("Selected Brand ID:", e.target.value);
+                  const selectedBrand = brands.find(brand => brand.brandId === e.target.value);
+                  console.log("Selected Brand Details:", selectedBrand);
+                  setSelectedBrandId(e.target.value);
+                }}
                 label="Brand"
               >
-                {brands.map((brand) => (
-                  <MenuItem key={brand.brandId} value={brand.brandName}>{brand.brandName}</MenuItem>
-                ))}
+                {brands.map((brand, index) => (
+                  <MenuItem key={brand.brandId ? brand.brandId : `brand-${index}`} value={brand.brandId}>
+                  {brand.brandName}
+                  </MenuItem>                ))}
               </Select>
             </FormControl>
           </Grid>
