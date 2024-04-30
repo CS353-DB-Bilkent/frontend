@@ -8,7 +8,8 @@ import { changePassword } from '../services/lib/password';
 import { notify, notifyError } from '../utility/notify';
 import NOTIFY_TYPES from '../constants/notifyTypes';
 
-export default function UserSettings({ user }) {
+export default function UserSettings({ _user }) {
+  const user = useAuthStore((s) => s.user);
   const setLoading = useLoadingStore((s) => s.setLoading);
   const isOrganizer = user.role === ROLES.EVENT_ORGANIZER;
   // State for form fields
@@ -20,6 +21,8 @@ export default function UserSettings({ user }) {
     confirmNewPassword: '',
   });
 
+  console.log(formData);
+
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
@@ -27,7 +30,13 @@ export default function UserSettings({ user }) {
     setPasswordData({ ...passwordData, [prop]: event.target.value });
   };
   const handleFormDataChange = (event) => {
-    const { name, value } = event.target;
+    let { name, value } = event.target;
+    console.log(name, value);
+
+    if (name === 'birthDate') {
+      value = new Date(value);
+    }
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: value,
@@ -46,7 +55,7 @@ export default function UserSettings({ user }) {
       notifyError(error.response.data);
     } finally {
       setLoading(false);
-      window.location.reload();
+      // window.location.reload();
     }
   };
 
@@ -92,21 +101,6 @@ export default function UserSettings({ user }) {
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField margin="normal" fullWidth id="phone" label="Phone Number" name="phone" value={formData.phone} onChange={handleFormDataChange} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                margin="normal"
-                fullWidth
-                id="birthDate"
-                label="Birth Date"
-                type="date"
-                name="birthDate"
-                value={formData.birthDate}
-                onChange={handleFormDataChange}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
             </Grid>
 
             {isOrganizer && (

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Typography, Paper, List, ListItem, ListItemText, Divider } from '@mui/material';
 import { approveEvent, getUnapprovedEvents, rejectEvent } from '../services/lib/event'; // Assuming axiosInstance is set up with baseURL
+import { notify, notifyError } from '../utility/notify';
+import NOTIFY_TYPES from '../constants/notifyTypes';
 
 const EventApprovalPage = () => {
   const [events, setEvents] = useState([]);
@@ -14,11 +16,15 @@ const EventApprovalPage = () => {
         console.error('Error fetching unapproved events:', error);
       });
   }, []);
+
   const handleApprove = async (eventId) => {
     try {
       await approveEvent(eventId);
-      setEvents(events.filter((event) => event.id !== eventId));
+      setEvents(events.filter((event) => event.eventId !== eventId));
+      notify('Event approved successfully', NOTIFY_TYPES.SUCCESS);
+      setEvents(events.filter((event) => event.eventId !== eventId));
     } catch (error) {
+      notifyError(error.response.data);
       console.error('Error approving event:', error);
     }
   };
@@ -26,8 +32,11 @@ const EventApprovalPage = () => {
   const handleReject = async (eventId) => {
     try {
       await rejectEvent(eventId);
-      setEvents(events.filter((event) => event.id !== eventId));
+      setEvents(events.filter((event) => event.eventId !== eventId));
+      notify('Event rejected successfully', NOTIFY_TYPES.SUCCESS);
+      setEvents(events.filter((event) => event.eventId !== eventId));
     } catch (error) {
+      notifyError(error.response.data);
       console.error('Error rejecting event:', error);
     }
   };
