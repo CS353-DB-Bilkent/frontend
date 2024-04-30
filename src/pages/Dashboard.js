@@ -1,7 +1,4 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Paper, Select, TextField, Typography } from '@mui/material';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useQuery } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { handleSaveNewBrand } from '../components/Brands';
@@ -10,8 +7,10 @@ import { handleSaveNewVenue } from '../components/Venues';
 
 import { handleSaveNewEventPerson } from '../components/EventPersons';
 import EVENT_TYPE from '../constants/eventType';
+import NOTIFY_TYPES from '../constants/notifyTypes';
 import { createEvent, getAllBrands, getAllEventPersons, getAllVenues, getMyEvents } from '../services/lib/event';
 import { useAuthStore } from '../stores/Store';
+import { notify, notifyError } from '../utility/notify';
 
 
 
@@ -71,19 +70,6 @@ export default function Dashboard() {
     await handleSaveNewVenue(venueDetails, setVenues, closeVenueModal, resetVenueForm);
   };
 
-  // useEffect(() => {
-  //   const loadVenues = async () => {
-  //     console.log("Fetching venues...");
-  //     const loadedVenues = await fetchVenues();
-  //     console.log("Venues loaded:", loadedVenues);
-  //     setVenues(loadedVenues);
-  //   };
-
-  //   if (venues.length === 0) {
-  //     loadVenues();
-  //   }
-  // }, []);
-
   const closeBrandModal = () => {
     setNewBrandOpen(false);
   };
@@ -96,20 +82,6 @@ export default function Dashboard() {
   const saveNewBrand = async () => {
     await handleSaveNewBrand(brandName, setBrands, closeBrandModal, resetBrandForm);
   };
-
-  // useEffect(() => {
-  //   const loadBrands = async () => {
-  //     console.log("Fetching brands...");
-  //     const loadedBrands = await fetchBrands();
-  //     console.log("Brands loaded:", loadedBrands);
-  //     setBrands(loadBrands);
-  //   };
-
-  //   if (brands.length === 0) {
-  //     loadBrands();
-  //   }
-  // }, []);
-
   
   const closeEventPersonModal = () => {
     setNewEventPersonOpen(false);
@@ -123,19 +95,6 @@ export default function Dashboard() {
   const saveNewEventPerson = async () => {
     await handleSaveNewEventPerson(eventPersonName, setEventPersons, closeEventPersonModal, resetEventPersonForm);
   };
-
-  // useEffect(() => {
-  //   const loadEventPersons = async () => {
-  //     console.log("Fetching eventpersons...");
-  //     const loadedEventPersons = await fetchEventPersons();
-  //     console.log("EventPersons loaded:", loadedEventPersons);
-  //     setEventPersons(loadEventPersons);
-  //   };
-
-  //   if (eventPersons.length === 0) {
-  //     loadEventPersons();
-  //   }
-  // }, []);
 
   const {
     data: myEvents,
@@ -172,31 +131,24 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (myEvents && myEvents.data?.data) {
-      console.log("My events:", myEvents.data?.data);
       setEvents(myEvents.data.data);
     }
   }, [myEvents]);
 
   useEffect(() => {
     if (initialVenues && initialVenues.data?.data) {
-      console.log("Loaded Venues:", initialVenues.data?.data);
-
       setVenues(initialVenues.data.data);
     }
   }, [initialVenues]);
   
   useEffect(() => {
     if (initialBrands && initialBrands.data?.data) {
-      console.log("Loaded Brands:", initialBrands.data?.data);
-
       setBrands(initialBrands.data.data);
     }
   }, [initialBrands]);
   
   useEffect(() => {
     if (initialEventPersons && initialEventPersons.data?.data) {
-      console.log("Loaded EventPersons:", initialEventPersons.data?.data);
-
       setEventPersons(initialEventPersons.data.data);
     }
   }, [initialEventPersons]);
@@ -230,7 +182,7 @@ export default function Dashboard() {
       formIsValid = false;
       tempErrors["eventDates"] = "Start and end dates are required.";
     }
-    if (!venueDetails.name) {
+    if (!selectedVenueId) {
       formIsValid = false;
       tempErrors["venueName"] = "Venue is required.";
     }
@@ -242,7 +194,7 @@ export default function Dashboard() {
       formIsValid = false;
       tempErrors["ticketPrice"] = "Ticket price is required.";
     }
-
+    console.log("Errors:", tempErrors);
     setErrors(tempErrors);
     return formIsValid;
   };
@@ -251,40 +203,36 @@ export default function Dashboard() {
   const handleDialogToggle = () => setOpen(!open);
   const handleSave = async () => {
 
-    console.log("helllooooooooo");
-    console.log("user id: ", user.userId     );
-
-    
-    if (validate) {
+    if (validate()) {
       try {
         const eventData = {
           name: eventName,
           details: eventDetails,
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString(),
+          startDate: new Date(startDate),
+          endDate:  new Date(endDate),
           ticketPrice: parseFloat(ticketPrice),
           numberOfTickets: parseInt(numberOfTickets, 10),
           eventType: eventType,
           minAgeAllowed: parseInt(minAgeAllowed, 10),
           userId: user.userId,
           venueId: selectedVenueId,
-          brandId: selectedBrandId,
-          eventPersonId: selectedEventPersonId,
+          brandId: selectedBrandId !== "" ? selectedBrandId : null,
+          eventPersonId: selectedEventPersonId  !== "" ? selectedEventPersonId : null,
           };
 
         console.log("Event Data:", eventData);
+    
         const result = await createEvent(eventData);
         console.log('Event created successfully:', result);
-        alert('Event created successfully!');
+        notify('Event created successfully!', NOTIFY_TYPES.SUCCESS);
         handleDialogToggle();
       }
       catch (error) {
-        alert('Failed to create event: ' + error.message);
+        notifyError(error.response.data);
       }
     }
   };
-  
-
+ 
   if (eventsLoading) return <Loading />;
   if (eventsError) return <Typography color="error">Error: {eventsError.message}</Typography>;
 
@@ -300,16 +248,18 @@ export default function Dashboard() {
           <Typography variant="h6">Your Events:</Typography>
           <Grid container spacing={2}>
 
-            {events && Array.isArray(events) ? events.map((event) => (
-              <Grid item key={event.id} xs={12} md={4}>
+            {events && Array.isArray(events) ? events.map((event) => {
+              return (
+              <Grid item key={event.eventId} xs={12} md={4}>
                 <Paper elevation={2} sx={{ p: 2 }}>
                   <Typography variant="h6">{event.name}</Typography>
                   <Typography variant="body2">Details: {event.details}</Typography>
-                  <Typography variant="body2">Tickets Remaining: {event.numberOfTickets}</Typography>                  
-
-                </Paper>
+                  <Typography variant="body2">Tickets Remaining: {event.numberOfTickets}</Typography>
+                  <Typography variant="body2">Start Date: {new Date(event.startDate).toDateString()}</Typography>
+                  <Typography variant='body2'>Status: {event.eventStatus} </Typography>
+                  </Paper>
               </Grid>
-            )) : <Typography>No events found or data is not in the expected format.</Typography>}
+            )}) : <Typography>No events found or data is not in the expected format.</Typography>}
           </Grid>
         </Paper>
       </Grid>
@@ -318,15 +268,7 @@ export default function Dashboard() {
           <DialogContentText sx={{ mb: 2, textAlign: 'center' }}>Create a New Event</DialogContentText>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <TextField
-                autoFocus
-                margin="dense"
-                id="name"
-                label="Event Name"
-                type="text"
-                required
-                fullWidth
-                value={eventName}
+              <TextField autoFocus margin="dense" id="name" label="Event Name" type="text" required fullWidth value={eventName} 
                 onChange={(e) => setEventName(e.target.value)}
                 variant="outlined"
                 error={!!errors.eventName}
@@ -344,12 +286,12 @@ export default function Dashboard() {
                   label="Event Type"
                   onChange={(e) => setEventType(e.target.value)}
                 >
-                <MenuItem value={'None'}>None</MenuItem>
-                <MenuItem value={EVENT_TYPE.CONCERT}>Concert</MenuItem>
-                <MenuItem value={EVENT_TYPE.SPORTS}>Sport</MenuItem>
-                <MenuItem value={EVENT_TYPE.THEATER}>Theater</MenuItem>
-                <MenuItem value={EVENT_TYPE.GATHERING}>Gathering</MenuItem>
-                <MenuItem value={EVENT_TYPE.PARTY}>Party</MenuItem>
+                  <MenuItem value={'None'}>None</MenuItem>
+                  <MenuItem value={EVENT_TYPE.CONCERT}>Concert</MenuItem>
+                  <MenuItem value={EVENT_TYPE.SPORTS}>Sport</MenuItem>
+                  <MenuItem value={EVENT_TYPE.THEATER}>Theater</MenuItem>
+                  <MenuItem value={EVENT_TYPE.GATHERING}>Gathering</MenuItem>
+                  <MenuItem value={EVENT_TYPE.PARTY}>Party</MenuItem>
                 </Select>
                 <FormHelperText>{errors.eventType}</FormHelperText>
 
@@ -403,48 +345,17 @@ export default function Dashboard() {
                 InputProps={{ inputProps: { min: 0 } }}
               />
             </Grid>
-            <Grid item xs={12} md={6}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DateTimePicker
-                  label="Start Date and Time *"
-                  value={startDate}
-                  onChange={setStartDate}
-                  renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        error={!!errors.eventDates}
-                        helperText={errors.eventDates || ""}
-                        fullWidth
-                        margin="dense"
-                    />
-                )}
-            />
-              </LocalizationProvider>
+            <Grid item xs={12} md={6}> 
+              <TextField margin="normal" required fullWidth id="startDate" onChange={(e) => setStartDate(e.target.value)} helperText={errors.eventDates || ""} label="Start Date" name="startDate" type="date"  InputLabelProps={{ shrink: true, }} />
             </Grid>
             <Grid item xs={12} md={6}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DateTimePicker
-                  label="End Date and Time *"
-                  required
-                  value={endDate}
-                  onChange={setEndDate}
-                  renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        error={!!errors.eventDates}
-                        helperText={errors.eventDates || ""}
-                        fullWidth
-                        margin="dense"
-                    />
-                )}
-              />
-              </LocalizationProvider>
+              <TextField margin="normal" required fullWidth id="endDate" onChange={(e) => setEndDate(e.target.value)}  helperText={errors.eventDates || ""} label="End Date" name="endDate" type="date" InputLabelProps={{ shrink: true, }} />
             </Grid>
          
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>
                 <InputLabel>Event Person</InputLabel>
-                <Select
+                <Select 
                   value={selectedEventPersonId}
                   onChange={(e) => setSelectedEventPersonId(e.target.value)}
                   label="Event Person"
@@ -482,10 +393,8 @@ export default function Dashboard() {
               <Select
                 value={selectedBrandId}
                 onChange={(e) => {
-                  console.log("Selected Brand ID:", e.target.value);
-                  const selectedBrand = brands.find(brand => brand.brandId === e.target.value);
-                  console.log("Selected Brand Details:", selectedBrand);
                   setSelectedBrandId(e.target.value);
+                  console.log("Selected Brand Id:", e.target.value);
                 }}
                 label="Brand"
               >
