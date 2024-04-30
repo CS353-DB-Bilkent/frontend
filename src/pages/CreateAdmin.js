@@ -1,76 +1,122 @@
-import { Grid, Typography, Paper, Box, Button } from '@mui/material';
-import CssBaseline from '@mui/material/CssBaseline';
-import Divider from '@mui/material/Divider';
-import TextField from '@mui/material/TextField';
-import { useState } from 'react';
-import MenuItem from '@mui/material/MenuItem';
-import * as React from 'react';
-import { notify, notifyError } from '../utility/notify';
+import React from 'react';
+import { Box, Button, Grid, Link, TextField, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { createAdmin } from '../services/lib/superAdmin';
-import NOTIFY_TYPES from '../constants/notifyTypes';
 import { useLoadingStore } from '../stores/Loading';
+import { notify, notifyError } from '../utility/notify';
+import NOTIFY_TYPES from '../constants/notifyTypes';
 
 export default function CreateAdmin() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [id, setId] = useState('');
-  const [department, setDepartment] = useState('');
-
+  const navigate = useNavigate();
   const setLoading = useLoadingStore((s) => s.setLoading);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
+    const data = {
+      email: formData.get('email'),
+      password: formData.get('password'),
+      name: formData.get('name'),
+      phone: formData.get('phone'),
+      birthDate: new Date(),
+      companyName: '',
+      salary: 0,
+      iban: '',
+    };
 
     try {
       setLoading(true);
-      await createAdmin(id, email, name, department);
-      notify('Admin is successfully created!', NOTIFY_TYPES.SUCCESS);
-    } catch (err) {
-      notifyError(err.response.data);
+      const response = await createAdmin(data);
+      notify('Admin created successfully', NOTIFY_TYPES.SUCCESS);
+      navigate('/login');
+    } catch (error) {
+      notifyError(error.response.data);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    setName('');
-    setEmail('');
-    setId('');
-    setDepartment('');
-  };
-
-  const handleChange = (event) => {
-    setDepartment(event.target.value);
   };
 
   return (
     <Grid
       container
+      component="main"
       sx={{
+        height: '100vh',
         display: 'flex',
+        flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        p: 5,
-        width: '100vw',
-        height: '90vh',
       }}
     >
-      <CssBaseline />
-      <Grid item sx={{ p: 8, display: 'flex', flexDirection: 'column', borderRadius: '16px', width: '95vw', height: '80vh' }} component={Paper}>
-        <Typography sx={{ fontSize: '30px', fontWeight: 'bold' }}>Admin Creation Panel</Typography>
-
-        <Divider style={{ width: '100%' }} />
-        <TextField sx={{ marginY: '35px', marginX: '20px', width: '250px' }} label="Name" required value={name} onChange={(e) => setName(e.target.value)}></TextField>
-        <Box direction="column" sx={{ marginX: '20px' }}>
-          <TextField sx={{ width: '250px' }} label="Bilkent Mail" required value={email} onChange={(e) => setEmail(e.target.value)}></TextField>
-        </Box>
-
-        <TextField sx={{ width: '250px', marginX: '20px', marginY: '35px' }} label="Bilkent ID" required value={id} onChange={(e) => setId(e.target.value)}></TextField>
-        <TextField sx={{ width: '250px', marginX: '20px' }} label="Department" select required value={department} onChange={handleChange} fullWidth>
-          <MenuItem value="CS">Computer Science</MenuItem>
-          <MenuItem value="ME">Mechanical Engineering</MenuItem>
-          <MenuItem value="EE">Electric Electronic Engineering</MenuItem>
-          <MenuItem value="IE">Industrial Engineering</MenuItem>
-        </TextField>
-        <Button type="submit" variant="contained" onClick={handleSubmit} sx={{ marginY: '35px', marginX: '20px', bgcolor: 'primary.main', width: '200px' }}>
+      <Grid
+        item
+        xs={12}
+        sm={8}
+        md={5}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          boxShadow: 3,
+          p: 2,
+          borderRadius: '16px',
+          backgroundColor: 'background.paper',
+          width: '100%',
+          maxWidth: '500px',
+        }}
+      >
+        <Typography component="h1" variant="h5">
           Create Admin
-        </Button>
+        </Typography>
+        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="name"
+            label="Name Surname"
+            name="name"
+            autoComplete="name"
+            autoFocus
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="new-password"
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="phone"
+            label="Phone Number"
+            name="phone"
+            autoComplete="tel"
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2, bgcolor: 'primary.main' }}
+          >
+            Create Admin
+          </Button>
+        </Box>
       </Grid>
     </Grid>
   );

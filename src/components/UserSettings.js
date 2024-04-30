@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Grid, TextField, Button, Typography, Tabs, Tab  } from '@mui/material';
 import { useAuthStore } from '../stores/Store';
-import axiosInstance from '../services/axiosInterceptor'; // Assuming useAuthStore is a custom hook for auth
 import { useLoadingStore } from '../stores/Loading';
+import ROLES from '../constants/roles';
+import { updateUser } from '../services/lib/user';
+import { changePassword } from '../services/lib/password';
 export default function UserSettings({user}) {
   const { setUser } = useAuthStore(); // Retrieve user data and update function
   const setLoading = useLoadingStore((s) => s.setLoading);
+  const isOrganizer = user.role === ROLES.EVENT_ORGANIZER;
   // State for form fields
   const [formData, setFormData] = useState({...user});
   const [activeTab,setActiveTab] = useState(0);
@@ -15,19 +18,6 @@ export default function UserSettings({user}) {
     confirmNewPassword: ''
   });
 
-  useEffect(() => {
-    // Fetch user data from backend when the component mounts
-    const fetchUserData = async () => {
-      try {
-        const response = await axiosInstance.get(`/user/${user.userId}`);
-        setFormData(response.data.data);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
-    fetchUserData();
-  }, [user.userId]);
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
@@ -47,9 +37,9 @@ export default function UserSettings({user}) {
     try {
       setLoading(true);
       // Submit the updated settings to the server
-      const response = await axiosInstance.post(`/user/${user.userId}/updateInfo`, formData);
+      const response = updateUser(user.userId,formData);
       // Update the user state with the response
-      setUser(response.data.data);
+      setUser(response.data);
 
       alert('User settings updated successfully!');
     } catch (error) {
@@ -63,14 +53,11 @@ export default function UserSettings({user}) {
   };
   const handleSubmitPasswordChange = async () => {
     try {
+      setLoading(true);
       if (passwordData.newPassword !== passwordData.confirmNewPassword) {
         throw new Error('Passwords do not match!');
       }
-      // Add the password change request logic here
-      const response = await axiosInstance.post(`/user/${user.userId}/changePassword`, {
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
-      });
+      await changePassword(passwordData.currentPassword, passwordData.newPassword);
       alert('Password changed successfully!');
       setPasswordData({
         currentPassword: '',
@@ -80,6 +67,9 @@ export default function UserSettings({user}) {
     } catch (error) {
       alert('An error occurred while changing the password.');
       console.error('Error changing password:', error);
+    }
+    finally{
+      setLoading(false);
     }
   };
 
@@ -144,6 +134,35 @@ export default function UserSettings({user}) {
                 }}
               />
             </Grid>
+
+            {isOrganizer && (
+              <>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="iban"
+                    label="IBAN"
+                    name="iban"
+                    value={formData.iban}
+                    onChange={handleFormDataChange}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="companyName"
+                    label="Company Name"
+                    name="companyName"
+                    value={formData.companyName}
+                    onChange={handleFormDataChange}
+                  />
+                </Grid>
+              </>
+            )}
           </Grid>
           <Button
             type="submit"
@@ -166,7 +185,7 @@ export default function UserSettings({user}) {
             type="password"
             id="currentPassword"
             value={passwordData.currentPassword}
-            onChange={handlePasswordDataChange}
+            onChange={handlePasswordDataChange('currentPassword')}
           />
           <TextField
             margin="normal"
@@ -177,7 +196,7 @@ export default function UserSettings({user}) {
             type="password"
             id="newPassword"
             value={passwordData.newPassword}
-            onChange={handlePasswordDataChange}
+            onChange={handlePasswordDataChange('newPassword')}
           />
           <TextField
             margin="normal"
@@ -188,7 +207,7 @@ export default function UserSettings({user}) {
             type="password"
             id="confirmNewPassword"
             value={passwordData.confirmNewPassword}
-            onChange={handlePasswordDataChange}
+            onChange={handlePasswordDataChange('confirmNewPassword')}
           />
           <Button
             type="submit"
@@ -198,7 +217,8 @@ export default function UserSettings({user}) {
           >
             Change Password
           </Button>
-        </Box>  )}
+        </Box>
+      )}
     </Box>
   );
 }

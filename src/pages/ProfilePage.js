@@ -3,26 +3,39 @@ import { Box, Container, Grid, Typography, Button, Paper } from '@mui/material';
 import Header from '../components/Header';
 import UserSettings from '../components/UserSettings';
 import MyTickets from '../components/MyTickets';
+import MyEvents from '../components/MyEvents';
+import MyTransactions from '../components/MyTransactions';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/Store';
+import { useLoadingStore } from '../stores/Loading';
+import ROLES from '../constants/roles';
+import EventApprovalPage from './EventApprovalPage';
+import Loading from '../components/loading/Loading';
+
 
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   // State to track the active section
-  const [activeSection, setActiveSection] = useState('tickets'); // 'settings' or 'tickets'
-
+  const [activeSection, setActiveSection] = useState(''); // 'settings' or 'tickets'
+  const { isLoading, setLoading } = useLoadingStore();
+  const isOrganizer = user.role === ROLES.EVENT_ORGANIZER;
+  const isAdmin = user.role === ROLES.ADMIN;
   useEffect(() => {
+    setLoading(true);
     // Redirect to login if not authenticated
     if (!user) {
       navigate('/login');
     }
-  }, [user, navigate]);
-
+    setLoading(false);  // Set loading to false once done
+  }, [user, navigate,setLoading]);
+  if (isLoading) {
+    return <Loading />;
+  }
   return (
     <Box>
-      <Header /> {/* Your Header component at the top */}
+      <Header />
       <Container maxWidth='false' sx={{ mt: 4 }}>
         <Grid container spacing={2} sx={{ height: 'calc(100vh - 64px)', mt: 4 }}>
           {/* Sidebar navigation */}
@@ -42,13 +55,33 @@ const ProfilePage = () => {
               >
                 User Settings
               </Button>
-              <Button
-                fullWidth
-                variant={activeSection === 'tickets' ? 'contained' : 'text'}
-                onClick={() => setActiveSection('tickets')}
-              >
-                My Tickets
-              </Button>
+              {!isAdmin && (
+                <Button
+                  fullWidth
+                  variant={activeSection === 'tickets' ? 'contained' : 'text'}
+                  onClick={() => setActiveSection(isOrganizer ? 'events' : 'tickets')}
+                >
+                  {isOrganizer ? 'My Events' : 'My Tickets'}
+                </Button>
+              )}
+              {!isAdmin && (
+                <Button
+                  fullWidth
+                  variant={activeSection === 'transactions' ? 'contained' : 'text'}
+                  onClick={() => setActiveSection('transactions')}
+                >
+                  Transactions
+                </Button>
+              )}
+              {isAdmin && (
+                <Button
+                  fullWidth
+                  variant={activeSection === 'eventApproval' ? 'contained' : 'text'}
+                  onClick={() => setActiveSection('eventApproval')}
+                >
+                  Event Approval
+                </Button>
+              )}
               <Button fullWidth color="error" onClick={() => {
                 logout();
                 navigate('/login');
@@ -63,6 +96,9 @@ const ProfilePage = () => {
           <Grid item xs={12} md={9}>
             {activeSection === 'settings' && user && <UserSettings user={user} />}
             {activeSection === 'tickets' && user && <MyTickets user={user} />}
+            {activeSection === 'events' && user && <MyEvents user={user} />}
+            {activeSection === 'transactions' && user && <MyTransactions user={user} />}
+            {activeSection === 'eventApproval' && isAdmin && <EventApprovalPage/>}
           </Grid>
         </Grid>
       </Container>
