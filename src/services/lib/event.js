@@ -51,7 +51,7 @@ export async function postReview(reviewData) {
   }
 }
 export async function buyTicket(userId, eventId, purchaseDate, price, ticketStatus, isBuyerVisible) {
-  const url = `/event/${eventId}/buyTicket`;
+  const url = `/event/buyTicket/${eventId}/${isBuyerVisible}`;
   console.log('Calling API:', axiosInstance.defaults.baseURL + url);
 
   const BuyTicketRequest = {

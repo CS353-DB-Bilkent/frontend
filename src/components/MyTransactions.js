@@ -11,31 +11,32 @@ const MyTransactions = ({ user }) => {
     if (user) {
       getMyTransactions()
         .then(async (response) => {
-          console.log('Transaction data:', response.data.data);  // Debug: Check the raw transaction data structure
-          const enrichedTransactions = await Promise.all(response.data.data.map(async (transaction) => {
-            if (transaction.transactionType === TRANSACTION_TYPE.EVENT_BUY || transaction.transactionType === TRANSACTION_TYPE.EVENT_REFUND) {
-              try {
-                const eventDetails = await getEventById(transaction.eventId);
-                console.log('Event details:', eventDetails.data); // Debug: Verify fetched event data structure
-                return {...transaction, eventTitle: eventDetails.data.name};
-              } catch (error) {
-                console.error(`Failed to fetch title for event ID: ${transaction.eventId}`, error);
-                return {...transaction, eventTitle: 'Event details not found'};
+          console.log('Transaction data:', response.data.data); // Debug: Check the raw transaction data structure
+          const enrichedTransactions = await Promise.all(
+            response.data.data.map(async (transaction) => {
+              if (transaction.transactionType === TRANSACTION_TYPE.EVENT_BUY || transaction.transactionType === TRANSACTION_TYPE.EVENT_REFUND) {
+                try {
+                  const eventDetails = await getEventById(transaction.eventId);
+                  console.log('Event details:', eventDetails.data); // Debug: Verify fetched event data structure
+                  return { ...transaction, eventTitle: eventDetails.data.name };
+                } catch (error) {
+                  console.error(`Failed to fetch title for event ID: ${transaction.eventId}`, error);
+                  return { ...transaction, eventTitle: 'Event details not found' };
+                }
+              } else {
+                return transaction;
               }
-            } else {
-              return transaction;
-            }
-          }));
+            })
+          );
 
           console.log('Enriched Transactions:', enrichedTransactions); // Debug: Check the final list of transactions
           setTransactions(enrichedTransactions);
         })
-        .catch(error => {
+        .catch((error) => {
           console.error('Error fetching transactions:', error);
         });
     }
   }, [user]);
-
 
   // Function to get the transaction description based on its type
   const getTransactionDescription = (transaction) => {
@@ -45,9 +46,9 @@ const MyTransactions = ({ user }) => {
       case TRANSACTION_TYPE.WITHDRAWAL:
         return 'WITHDRAW | Money withdrawn from the Wallet';
       case TRANSACTION_TYPE.EVENT_BUY:
-        return `BUY | ${transaction.eventTitle} Ticket`;
+        return `BUY | Ticket`;
       case TRANSACTION_TYPE.EVENT_REFUND:
-        return `REFUND | ${transaction.eventTitle} Ticket`;
+        return `REFUND | Ticket`;
       default:
         return 'UNRECOGNIZED | Transaction';
     }
@@ -63,7 +64,7 @@ const MyTransactions = ({ user }) => {
       case TRANSACTION_TYPE.WITHDRAWAL:
         return `-${transactionAmount.toFixed(2)}`;
       default:
-        return `${transactionAmount.toFixed(2)}`;  // No sign for unrecognized types
+        return `${transactionAmount.toFixed(2)}`; // No sign for unrecognized types
     }
   };
   return (
@@ -79,11 +80,11 @@ const MyTransactions = ({ user }) => {
                 <ListItemText
                   primary={getTransactionDescription(transaction)}
                   primaryTypographyProps={{
-                    style: { fontWeight: 'bold' }
+                    style: { fontWeight: 'bold' },
                   }}
                   secondary={new Date(transaction.transactionDate).toLocaleDateString()}
                   secondaryTypographyProps={{
-                    style: { color: '#555' }
+                    style: { color: '#555' },
                   }}
                 />
                 <Typography variant="body2" sx={{ textAlign: 'right', marginRight: 2 }}>
