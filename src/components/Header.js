@@ -31,7 +31,7 @@ const USER_ROLE_TO_PAGES = {
 
 const USER_ROLE_TO_PAGES_PATHS = {
   [ROLES.SUPER_ADMIN]: ['/super-admin/create-admin'],
-  [ROLES.ADMIN]: ['/main', '/event-approvals'],
+  [ROLES.ADMIN]: ['/main', '/admin/event-approvals'],
   [ROLES.EVENT_ORGANIZER]: ['/main', '/event-organizer/dashboard', '/wallet'],
   [ROLES.USER]: ['/main', '/wallet'],
   [ROLES.GUEST]: ['/main'],

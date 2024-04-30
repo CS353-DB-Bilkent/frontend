@@ -80,9 +80,9 @@ const router = createBrowserRouter([
   {
     path: 'profile',
     element: (
-      <PermissionContainer roles={[ROLES.USER, ROLES.EVENT_ORGANIZER, ROLES.ADMIN, ROLES.SUPER_ADMIN]}>
-      <ProfilePage />
-      </PermissionContainer>
+      <UserLoader>
+        <ProfilePage />
+      </UserLoader>
     ),
     errorElement: <ErrorPage />,
   },
@@ -171,7 +171,7 @@ const router = createBrowserRouter([
             path: 'event-approvals',
             element: <EventApprovalPage />,
             errorElement: <ErrorPage />,
-          }
+          },
         ],
       },
       {

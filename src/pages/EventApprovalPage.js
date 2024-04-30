@@ -7,17 +7,17 @@ const EventApprovalPage = () => {
 
   useEffect(() => {
     getUnapprovedEvents()
-      .then(response => {
+      .then((response) => {
         setEvents(response.data.data);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Error fetching unapproved events:', error);
       });
   }, []);
   const handleApprove = async (eventId) => {
     try {
       await approveEvent(eventId);
-      setEvents(events.filter(event => event.id !== eventId));
+      setEvents(events.filter((event) => event.id !== eventId));
     } catch (error) {
       console.error('Error approving event:', error);
     }
@@ -26,7 +26,7 @@ const EventApprovalPage = () => {
   const handleReject = async (eventId) => {
     try {
       await rejectEvent(eventId);
-      setEvents(events.filter(event => event.id !== eventId));
+      setEvents(events.filter((event) => event.id !== eventId));
     } catch (error) {
       console.error('Error rejecting event:', error);
     }
@@ -39,27 +39,19 @@ const EventApprovalPage = () => {
       </Typography>
       <List>
         {events.map((event) => (
-          <Paper key={event.id} elevation={3} sx={{ mb: 2 }}>
+          <Paper key={event.eventId} elevation={3} sx={{ mb: 2 }}>
             <ListItem>
-              <ListItemText
-                primary={event.name}
-                secondary={
-                  `Type: ${event.type} - Artist: ${event.artist} - Age Limit: ${event.minimumAgeAllowed}`
-                }
-              />
-              <Button onClick={() => handleApprove(event.id)} variant="contained" color="primary">
+              <ListItemText primary={event.name} secondary={`Type: ${event.eventType} - Age Limit: ${event.minAgeAllowed}`} />
+              <Button onClick={() => handleApprove(event.eventId)} variant="contained" color="primary">
                 Approve
               </Button>
-              <Button onClick={() => handleReject(event.id)} variant="contained" color="secondary" sx={{ ml: 2 }}>
+              <Button onClick={() => handleReject(event.eventId)} variant="contained" color="secondary" sx={{ ml: 2 }}>
                 Reject
               </Button>
             </ListItem>
             <Divider />
             <ListItem>
-              <ListItemText
-                primary={`City: ${event.city} - Venue: ${event.venue}`}
-                secondary={`Start: ${new Date(event.start).toLocaleString()} - End: ${new Date(event.end).toLocaleString()}`}
-              />
+              <ListItemText primary={`Start: ${new Date(event.startDate).toLocaleString()} - End: ${new Date(event.endDate).toLocaleString()}`} secondary={event.details} />
               <Typography variant="body2" sx={{ ml: 'auto' }}>
                 Number of Tickets: {event.numberOfTickets}
               </Typography>

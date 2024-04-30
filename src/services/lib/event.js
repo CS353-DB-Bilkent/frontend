@@ -3,7 +3,7 @@ import axiosInstance from '../axiosInterceptor';
 export async function getAllEvents() {
   return await axiosInstance.get('/event/all');
 }
-export async function getMyTickets(userId){
+export async function getMyTickets(userId) {
   return await axiosInstance.get(`/event/getAllTickets/${userId}`);
 }
 export async function getEventById(eventId) {
@@ -32,7 +32,6 @@ export async function searchEvents(searchTerm, artistName, brandName, venueName,
 export async function reportEvent(eventId) {
   try {
     return await axiosInstance.post(`/event/reportEvent/${eventId}`);
-
   } catch (error) {
     console.error('Error fetching the event report:', error);
     throw new Error('There was an error fetching the event report.');
@@ -40,7 +39,7 @@ export async function reportEvent(eventId) {
 }
 export async function postReview(reviewData) {
   try {
-      return await axiosInstance.post(`/reviews/post`, {
+    return await axiosInstance.post(`/reviews/post`, {
       rating: reviewData.rating,
       description: reviewData.comment,
       reviewDate: new Date().toISOString().split('T')[0], // Review date is today
@@ -68,7 +67,7 @@ export async function buyTicket(userId, eventId, purchaseDate, price, ticketStat
   return await axiosInstance.post(url, BuyTicketRequest);
 }
 
-export async function refundTicket(ticketId){
+export async function refundTicket(ticketId) {
   return await axiosInstance.post(`/event/refundTicket/${ticketId}`);
 }
 
@@ -79,14 +78,14 @@ export async function cancelEvent(eventId) {
   return await axiosInstance.post(`/event/cancelEvent/${eventId}`);
 }
 
-export async function getUnapprovedEvents(){
-  return await axiosInstance.get(`/events/getUnapprovedEvents`);
+export async function getUnapprovedEvents() {
+  return await axiosInstance.get(`/event/getUnapprovedEvents`);
 }
-export async function approveEvent(eventId){
-  return await axiosInstance.get(`/events/approve/${eventId}`);
+export async function approveEvent(eventId) {
+  return await axiosInstance.get(`/event/approveEvent/${eventId}`);
 }
-export async function rejectEvent(eventId){
-  return await axiosInstance.get(`/events/reject/${eventId}`);
+export async function rejectEvent(eventId) {
+  return await axiosInstance.get(`/event/rejectEvent/${eventId}`);
 }
 export async function createVenue(venueData) {
   return await axiosInstance.post('event/createVenue', venueData);
@@ -95,9 +94,9 @@ export async function createVenue(venueData) {
 export async function getVenueById(eventId) {
   return await axiosInstance.get(`/event/${eventId}/getVenue`);
 }
-export async function getBrand(eventId){
+export async function getBrand(eventId) {
   return await axiosInstance.get(`/event/${eventId}/getBrand`);
-};
+}
 export async function getAllVenues() {
   return await axiosInstance.get('/event/getAllVenues');
 }
@@ -109,12 +108,12 @@ export async function getAllEventPersons() {
 }
 export async function createBrand(brandName) {
   return await axiosInstance.post('/event/createBrand', { name: brandName });
-};
+}
 
 export async function getEventPerson(eventId) {
   return await axiosInstance.get(`/event/${eventId}/getEventPerson`);
-};
+}
 
 export async function createEventPerson(eventPersonName) {
   return await axiosInstance.post('/event/createEventPerson', { name: eventPersonName });
-};
+}

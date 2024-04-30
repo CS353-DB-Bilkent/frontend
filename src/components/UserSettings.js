@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Grid, TextField, Button, Typography, Tabs, Tab  } from '@mui/material';
+import { Box, Grid, TextField, Button, Typography, Tabs, Tab } from '@mui/material';
 import { useAuthStore } from '../stores/Store';
 import { useLoadingStore } from '../stores/Loading';
 import ROLES from '../constants/roles';
 import { updateUser } from '../services/lib/user';
 import { changePassword } from '../services/lib/password';
-export default function UserSettings({user}) {
-  const { setUser } = useAuthStore(); // Retrieve user data and update function
+import { notify, notifyError } from '../utility/notify';
+import NOTIFY_TYPES from '../constants/notifyTypes';
+
+export default function UserSettings({ user }) {
   const setLoading = useLoadingStore((s) => s.setLoading);
   const isOrganizer = user.role === ROLES.EVENT_ORGANIZER;
   // State for form fields
-  const [formData, setFormData] = useState({...user});
-  const [activeTab,setActiveTab] = useState(0);
+  const [formData, setFormData] = useState({ ...user });
+  const [activeTab, setActiveTab] = useState(0);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
-    confirmNewPassword: ''
+    confirmNewPassword: '',
   });
 
   const handleTabChange = (event, newValue) => {
@@ -37,38 +39,36 @@ export default function UserSettings({user}) {
     try {
       setLoading(true);
       // Submit the updated settings to the server
-      const response = updateUser(user.userId,formData);
-      // Update the user state with the response
-      setUser(response.data);
-
-      alert('User settings updated successfully!');
+      await updateUser(user.userId, formData);
+      notify('Settings updated successfully!', NOTIFY_TYPES.SUCCESS);
     } catch (error) {
       // Handle errors appropriately
-      alert('An error occurred while updating settings.');
-      console.error('Error updating user settings:', error);
-    }
-    finally{
+      notifyError(error.response.data);
+    } finally {
       setLoading(false);
+      window.location.reload();
     }
   };
+
   const handleSubmitPasswordChange = async () => {
     try {
       setLoading(true);
       if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-        throw new Error('Passwords do not match!');
+        notify('Passwords do not match!', NOTIFY_TYPES.ERROR);
+        return;
       }
+
       await changePassword(passwordData.currentPassword, passwordData.newPassword);
-      alert('Password changed successfully!');
+      notify('Password changed successfully!', NOTIFY_TYPES.SUCCESS);
+
       setPasswordData({
         currentPassword: '',
         newPassword: '',
-        confirmNewPassword: ''
+        confirmNewPassword: '',
       });
     } catch (error) {
-      alert('An error occurred while changing the password.');
-      console.error('Error changing password:', error);
-    }
-    finally{
+      notifyError(error.response.data);
+    } finally {
       setLoading(false);
     }
   };
@@ -85,39 +85,13 @@ export default function UserSettings({user}) {
           <Typography variant="h6">Personal Information</Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="name"
-                label="Name Surname"
-                name="name"
-                value={formData.name}
-                onChange={handleFormDataChange}
-              />
+              <TextField margin="normal" required fullWidth id="name" label="Name Surname" name="name" value={formData.name} onChange={handleFormDataChange} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email"
-                name="email"
-                value={formData.email}
-                onChange={handleFormDataChange}
-              />
+              <TextField margin="normal" required fullWidth id="email" label="Email" name="email" value={formData.email} onChange={handleFormDataChange} />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField
-                margin="normal"
-                fullWidth
-                id="phone"
-                label="Phone Number"
-                name="phone"
-                value={formData.phone}
-                onChange={handleFormDataChange}
-              />
+              <TextField margin="normal" fullWidth id="phone" label="Phone Number" name="phone" value={formData.phone} onChange={handleFormDataChange} />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -138,16 +112,7 @@ export default function UserSettings({user}) {
             {isOrganizer && (
               <>
                 <Grid item xs={12} sm={6}>
-                  <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    id="iban"
-                    label="IBAN"
-                    name="iban"
-                    value={formData.iban}
-                    onChange={handleFormDataChange}
-                  />
+                  <TextField margin="normal" required fullWidth id="iban" label="IBAN" name="iban" value={formData.iban} onChange={handleFormDataChange} />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -164,18 +129,16 @@ export default function UserSettings({user}) {
               </>
             )}
           </Grid>
-          <Button
-            type="submit"
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
+          <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2 }}>
             Update
           </Button>
         </Box>
       )}
       {activeTab === 1 && (
         <Box component="form" noValidate onSubmit={handleSubmitPasswordChange} sx={{ mt: 1 }}>
-          <Typography variant="h6" gutterBottom>Change Password</Typography>
+          <Typography variant="h6" gutterBottom>
+            Change Password
+          </Typography>
           <TextField
             margin="normal"
             required
@@ -209,12 +172,7 @@ export default function UserSettings({user}) {
             value={passwordData.confirmNewPassword}
             onChange={handlePasswordDataChange('confirmNewPassword')}
           />
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2, mb: 2 }}
-          >
+          <Button type="submit" variant="contained" color="primary" sx={{ mt: 2, mb: 2 }}>
             Change Password
           </Button>
         </Box>
@@ -222,4 +180,3 @@ export default function UserSettings({user}) {
     </Box>
   );
 }
-
