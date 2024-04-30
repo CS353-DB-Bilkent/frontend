@@ -4,6 +4,6 @@ export function searchUsers(query) {
   return axiosInstance.get('/user/search?q=' + query);
 }
 
-export async function getUsersBySemesterId(semesterId) {
-  return await axiosInstance.get(`/user/by-semester/${semesterId}`);
+export async function updateUser(userId,formData){
+  return await axiosInstance.post(`/user/${userId}/updateInfo`, formData);
 }

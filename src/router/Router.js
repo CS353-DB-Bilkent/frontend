@@ -19,6 +19,8 @@ import RegisterUser from '../pages/RegisterUser';
 import ResetPassword from '../pages/ResetPassword';
 import Wallet from '../pages/Wallet';
 import ProfilePage from '../pages/ProfilePage';
+import CreateAdmin from '../pages/CreateAdmin';
+import EventApprovalPage from '../pages/EventApprovalPage';
 
 export function Router() {
   return <RouterProvider router={router} />;
@@ -76,7 +78,7 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
   {
-    path: 'profile', //TODO Böyle olması gerektiğinden emin değilim
+    path: 'profile',
     element: (
       <PermissionContainer roles={[ROLES.USER, ROLES.EVENT_ORGANIZER, ROLES.ADMIN, ROLES.SUPER_ADMIN]}>
       <ProfilePage />
@@ -149,7 +151,13 @@ const router = createBrowserRouter([
             <Outlet />
           </PermissionContainer>
         ),
-        children: [],
+        children: [
+          {
+            path: 'create-admin',
+            element: <CreateAdmin />,
+            errorElement: <ErrorPage />,
+          },
+        ],
       },
       {
         path: 'admin/',
@@ -158,7 +166,13 @@ const router = createBrowserRouter([
             <Outlet />
           </PermissionContainer>
         ),
-        children: [],
+        children: [
+          {
+            path: 'event-approvals',
+            element: <EventApprovalPage />,
+            errorElement: <ErrorPage />,
+          }
+        ],
       },
       {
         path: 'logout',
