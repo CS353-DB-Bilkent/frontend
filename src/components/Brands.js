@@ -34,15 +34,3 @@ catch (error) {
     alert(':( Failed to create brand: ' + error.response.data.message || error.message);
 }
 };
-
-// export const fetchBrands = async () => {
-//     try {
-//         console.log("Fetching brands from API");
-//         const response = await getAllBrands();
-//         return response.data;
-//     } catch (error) {
-//         console.error("Failed to fetch brands:", error);
-//         return [];
-//     }
-// };
-

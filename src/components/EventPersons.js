@@ -8,6 +8,7 @@ export const handleSaveNewEventPerson = async (newEventPersonName, setEventPerso
     const newEventPerson = {
         eventPersonName: newEventPersonName,
     };
+    console.log("newEventPerson:", newEventPerson);
     try {
       const response = await createEventPerson(newEventPerson);
       console.log("Response received:", response);
@@ -32,15 +33,3 @@ export const handleSaveNewEventPerson = async (newEventPersonName, setEventPerso
     }
   };
 
-
-  // export const fetchEventPersons = async () => {
-  //   try {
-  //     console.log("Fetching eventpersons from API");
-  //     const response = await getAllEventPersons();
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error("Failed to fetch eventpersons:", error);
-  //     return [];
-  //   }
-  // };
-  

@@ -1,22 +1,21 @@
-import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
-import AdbIcon from '@mui/icons-material/Adb';
-import ROLES from '../constants/roles';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../stores/Store';
 import { AirplaneTicket } from '@mui/icons-material';
+import AdbIcon from '@mui/icons-material/Adb';
+import MenuIcon from '@mui/icons-material/Menu';
+import AppBar from '@mui/material/AppBar';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Toolbar from '@mui/material/Toolbar';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import * as React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import ROLES from '../constants/roles';
+import { useAuthStore } from '../stores/Store';
 
 const PROFILE_SETTINGS = ['Profile', 'Logout'];
 const PROFILE_SETTINGS_PATHS = ['/profile', '/logout'];
@@ -68,6 +67,28 @@ function Header() {
     setAnchorElUser(null);
     navigate('/login');
   };
+  function stringToColor(string) {
+    let hash = 0;
+    let i;
+      for (i = 0; i < string.length; i += 1) {
+      hash = string.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    let color = '#';
+    for (i = 0; i < 3; i += 1) {
+      const value = (hash >> (i * 8)) & 0xff;
+      color += `00${value.toString(16)}`.slice(-2);
+    }
+  
+    return color;
+  }
+  function stringAvatar(name) {
+    return {
+      sx: {
+        bgcolor: stringToColor(name),
+      },
+      children: name.length > 1 ? `${name[0]}${name[1]}` : `${name[0]}`,
+    };
+  }
 
   return (
     <AppBar sx={{ bgcolor: 'primary.main' }} position="static">
@@ -147,11 +168,13 @@ function Header() {
               </Button>
             ))}
           </Box>
+          <Typography sx={{paddingRight: '20px'}}>Current Balance: {user.balance}</Typography>
+
 
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar />
+                <Avatar {...stringAvatar(user.name)} />
               </IconButton>
             </Tooltip>
             <Menu
