@@ -37,16 +37,3 @@ import { createVenue } from '../services/lib/event';
       alert(':( Failed to create venue: ' + error.response.data.message || error.message);
     }
   };
-
-
-  // export const fetchVenues = async () => {
-  //   try {
-  //     console.log("Fetching venues from API");
-  //     const response = await getAllVenues();
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error("Failed to fetch venues:", error);
-  //     return [];
-  //   }
-  // };
-  

@@ -1,6 +1,6 @@
 import NOTIFY_TYPES from '../constants/notifyTypes';
 import { createBrand, getAllBrands } from '../services/lib/event';
-import { notify } from '../utility/notify';
+import { notify, notifyError } from '../utility/notify';
 
 export const handleSaveNewBrand = async (newBrandName, setBrands, closeBrandModal, resetBrandForm) => {
   if (!newBrandName) {
@@ -25,7 +25,8 @@ export const handleSaveNewBrand = async (newBrandName, setBrands, closeBrandModa
     resetBrandForm();
   } catch (error) {
     console.error('Error creating brand:', error);
-    alert(':( Failed to create brand: ' + error.response.data.message || error.message);
+    notifyError(error.response.data);
+    // alert(':( Failed to create brand: ' + error.response.data.message || error.message);
   }
 };
 

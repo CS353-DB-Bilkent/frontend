@@ -53,8 +53,8 @@ export default function Dashboard() {
   const [newBrandOpen, setNewBrandOpen] = useState(false);
   const [newEventPersonOpen, setNewEventPersonOpen] = useState(false);
   const [brands, setBrands] = useState([]);
-  const [brandName, setBrandName] = useState('');
-  const [eventPersonName, setEventPersonName] = useState('');
+  const [newBrandName, setNewBrandName] = useState('');
+  const [newEventPersonName, setNewEventPersonName] = useState('');
   const [selectedVenueId, setSelectedVenueId] = useState('');
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [selectedEventPersonId, setSelectedEventPersonId] = useState('');
@@ -87,11 +87,11 @@ export default function Dashboard() {
   };
 
   const resetBrandForm = () => {
-    setBrandName('');
+    setBrands('');
   };
 
   const saveNewBrand = async () => {
-    await handleSaveNewBrand(brandName, setBrands, closeBrandModal, resetBrandForm);
+    await handleSaveNewBrand(newBrandName, setBrands, closeBrandModal, resetBrandForm);
   };
 
   const closeEventPersonModal = () => {
@@ -99,11 +99,11 @@ export default function Dashboard() {
   };
 
   const resetEventPersonForm = () => {
-    setEventPersonName('');
+    setNewEventPersonName('');
   };
 
   const saveNewEventPerson = async () => {
-    await handleSaveNewEventPerson(eventPersonName, setEventPersons, closeEventPersonModal, resetEventPersonForm);
+    await handleSaveNewEventPerson(newEventPersonName, setEventPersons, closeEventPersonModal, resetEventPersonForm);
   };
 
   const {
@@ -511,7 +511,17 @@ export default function Dashboard() {
       <Dialog open={newBrandOpen} onClose={() => setNewBrandOpen(false)}>
         <DialogTitle>Add New Brand</DialogTitle>
         <DialogContent>
-          <TextField autoFocus margin="dense" id="brandName" label="Brand Name" type="text" required fullWidth value={brandName} onChange={(e) => setBrandName(e.target.value)} />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="brandName"
+            label="Brand Name"
+            type="text"
+            required
+            fullWidth
+            value={newBrandName}
+            onChange={(e) => setNewBrandName(e.target.value)}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setNewBrandOpen(false)}>Cancel</Button>
@@ -524,13 +534,13 @@ export default function Dashboard() {
           <TextField
             autoFocus
             margin="dense"
-            id="eventPersonName"
+            id="newEventPersonName"
             label="EventPerson Name"
             type="text"
             required
             fullWidth
-            value={eventPersonName}
-            onChange={(e) => setEventPersonName(e.target.value)}
+            value={newEventPersonName}
+            onChange={(e) => setNewEventPersonName(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
