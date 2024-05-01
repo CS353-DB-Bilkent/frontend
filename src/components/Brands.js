@@ -1,38 +1,32 @@
-import { createBrand } from '../services/lib/event';
-
+import NOTIFY_TYPES from '../constants/notifyTypes';
+import { createBrand, getAllBrands } from '../services/lib/event';
+import { notify } from '../utility/notify';
 
 export const handleSaveNewBrand = async (newBrandName, setBrands, closeBrandModal, resetBrandForm) => {
-if (!newBrandName) {
-    alert("Please fill all fields correctly!!");
+  if (!newBrandName) {
+    alert('Please fill all fields correctly!!');
     return;
-}
+  }
 
-const newBrand = {
+  const newBrand = {
     brandName: newBrandName,
-};
+  };
 
-try {
+  try {
     const response = await createBrand(newBrand);
-    console.log("Response received:", response);
+    console.log('Response received:', response);
 
-    console.log("Brand created successfully :) with data:", response.data);
-    alert('Brand created successfully :)');
-    const updatedBrand = response.data;
+    notify('Brand created successfully :)', NOTIFY_TYPES.SUCCESS);
 
-    if (!updatedBrand || updatedBrand.brandId === null) {
-    alert('Invalid brand data received. Please try again.');
-    console.error('Invalid brand data:', updatedBrand);
-    return;
-}
+    const responseBrands = await getAllBrands();
 
-    setBrands(prevBrands => [...prevBrands, updatedBrand]);
+    setBrands(responseBrands.data.data);
     closeBrandModal();
     resetBrandForm();
-}
-catch (error) {
-    console.error("Error creating brand:", error);
+  } catch (error) {
+    console.error('Error creating brand:', error);
     alert(':( Failed to create brand: ' + error.response.data.message || error.message);
-}
+  }
 };
 
 // export const fetchBrands = async () => {
@@ -45,4 +39,3 @@ catch (error) {
 //         return [];
 //     }
 // };
-

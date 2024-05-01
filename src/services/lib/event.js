@@ -108,7 +108,7 @@ export async function getAllEventPersons() {
   return await axiosInstance.get('/event/getAllEventPersons');
 }
 export async function createBrand(brandName) {
-  return await axiosInstance.post('/event/createBrand', { name: brandName });
+  return await axiosInstance.post('/event/createBrand', brandName);
 }
 
 export async function getEventPerson(eventId) {
@@ -116,7 +116,7 @@ export async function getEventPerson(eventId) {
 }
 
 export async function createEventPerson(eventPersonName) {
-  return await axiosInstance.post('/event/createEventPerson', { name: eventPersonName });
+  return await axiosInstance.post('/event/createEventPerson', eventPersonName);
 }
 
 export async function getEventAttendees(eventId) {
