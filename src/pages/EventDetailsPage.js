@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom';
 import Loading from '../components/loading/Loading';
 import NOTIFY_TYPES from '../constants/notifyTypes';
 import TICKET_STATUS from '../constants/ticketStatus';
-import { buyTicket, getEventAttendees, getEventById, getReviews, getVenueById } from '../services/lib/event';
+import { buyTicket, getBrand, getEventAttendees, getEventById, getEventPerson, getReviews, getVenueById } from '../services/lib/event';
 import { useAuthStore } from '../stores/Store';
 import { notify, notifyError } from '../utility/notify';
 const EventDetailsPage = () => {
@@ -15,6 +15,8 @@ const EventDetailsPage = () => {
   const [attendees, setAttendees] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [venue, setVenue] = useState(null);
+  const [brand, setBrand] = useState(null);
+  const [eventPerson, setEventPerson] = useState(null);
   const [loading, setLoading] = useState(true);
   const [ticketsDialog, setTicketsDialog] = useState(false);
   const [buyerVisible, setBuyerVisible] = useState(false);
@@ -61,6 +63,10 @@ const EventDetailsPage = () => {
         setReviews(reviewsResponse.data.data);
         const venueDetails = await getVenueById(eventId);
         setVenue(venueDetails.data.data);
+        const brandDetails = await getBrand(eventId);
+        setBrand(brandDetails.data.data);
+        const eventPersonDetails = await getEventPerson(eventId);
+        setEventPerson(eventPersonDetails.data.data);
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -124,6 +130,8 @@ const EventDetailsPage = () => {
           <Typography variant="body1">{event.eventStatus} event</Typography>
           <Typography variant="body1">Tickets Left: {event.numberOfTickets}</Typography>
           <Typography variant="body1">Minimum Age Allowed: {event.minAgeAllowed}</Typography>
+          <Typography variant="body1">Brand for the event: {brand.brandName}</Typography>
+          <Typography variant="body1">Event Person: {eventPerson.eventPersonName}</Typography>
           <hr></hr>
           <Typography variant="h6">Venue Details </Typography>
           <Typography variant="body1">{venue ? venue.venueName : "Loading venue details..."}</Typography>
@@ -133,7 +141,7 @@ const EventDetailsPage = () => {
 
         
         </div>
-        <div  style={{   display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }} >
+        <div  style={{ flex: 1 }} >
           <Button variant="contained" color="primary" onClick={handleOpenTicketsDialog}>
             See Tickets
           </Button>
